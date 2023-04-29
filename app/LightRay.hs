@@ -18,9 +18,16 @@ data Ray a = Ray {dir :: Vec3 a a a, origin :: Vec3 a a a, col :: Vec3 a a a}
 -- Checks for collision with object. Applies equation of a sphere and gets intersections with abc formula
 collide :: (Ord a, Floating a) => Object a -> Ray a -> Maybe (Vec3 a a a)
 collide (Sphere r (Vec3 (mx,my,mz)) _) (Ray v@(Vec3 (vx,vy,vz)) o@(Vec3 (ox,oy,oz)) _)
+{-
+TODO:
+Rays cant collide with the object if they are inside the object. this is needed for refractive materials
+Remove unneeded pattern matching.
+-}
   -- the checks for K being positive checks if the lightrays actually travel in the vectors direction, if its negative they travel backwards
   | det < 0 = Nothing
   | vecLen d1 < vecLen d2 && k1 >= 0 = Just (d1 + o)
+  | vecLen d2 < vecLen d1 && k2 >= 0 = Just (d2 + o)
+  | k1 >= 0 = Just (d1 + o)
   | k2 >= 0 = Just (d2 + o)
   | otherwise = Nothing
   where a = vx^2+vy^2+vz^2
@@ -45,7 +52,10 @@ collideObjects o r@(Ray _ origin _)    = closest $ (filter (isJust . snd) . zip 
   where closest []                     = Nothing
         closest ((_, Nothing):ovs)     = closest ovs
         closest ((object, Just p):ovs) = case closest ovs of -- the addition of 0.001 * g is because floating numbers will otherwise sometimes round wrong which will make the rays hit their own objects
-                                         Just (nObj, a) -> if vecLen (a - origin) < vecLen (p - origin) then Just (nObj, a + scalarMul 0.001 (gradient object a)) else Just (object, p + scalarMul 0.001 (gradient object p))
+                                         Just (nObj, a) ->
+                                           if vecLen (a - origin) < vecLen (p - origin)
+                                           then Just (nObj, a + scalarMul 0.001 (gradient object a))
+                                           else Just (object, p + scalarMul 0.001 (gradient object p))
                                          Nothing        -> Just (object, p + scalarMul 0.001 (gradient object p))
 
 -- Given an object, the point of intersection with that object and the ray that intersected the object,
@@ -64,9 +74,20 @@ bouncedRay s@(Sphere _ _ Specular) p (Ray rDir _ c) = do -- TODO: Implement diff
       d = unitVector rDir
       dirOut = d - scalarMul (2 * dot d g)  g
   return (Ray dirOut p (scalarMul 0.8 c))
--- bouncedRay s@(Sphere _ _ (Refractive i)) p (Ray rDir _ c) = do
---   let g = gradient s p
---       d = unitVector rDir
+bouncedRay s@(Sphere _ o (Refractive i)) p (Ray rDir _ col) = do -- TODO: does not collide inside sphere
+  let r1 = 1/i -- Ratio of refractive indices, air to objects material
+      r2 = i -- Ratio of refractive indices, objects material to air
+      n1 = gradient s p -- First normal vector
+      p1 = p - scalarMul 0.002 n1 -- Point just inside the sphere
+      d1 = dirChange r1 n1 rDir -- Direction inside the sphere
+      p2 = case collide s (Ray d1 p1 col) of
+        Just a -> a
+        Nothing -> error "Ray which was inside sphere could not collide with sphere. gg"
+      n2 = gradient s p2
+  return (Ray (dirChange r2 n2 d1) p2 col)
+  where dirChange r n l = newDir -- snell's law
+          where c = -dot n l
+                newDir = scalarMul r l + scalarMul (r*c - sqrt(1-r^2*(1-c^2))) n
 
 
 -- Takes the list of objects, list of rays, ray bounces, rays per pixel. Returns colours
