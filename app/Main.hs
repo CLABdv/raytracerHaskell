@@ -19,18 +19,19 @@ Make so that you can change the intensity of the lightrays from certain objects.
 Issue with this is that it probably is required to send a buncha rays for it to look good
 -}
   seed <- randomIO :: IO Int
-  let lookfrom = Vec3 (0,1,8) :: Vec3 Float Float Float --lookfrom, lookat, width, height and vup are magic numbers. so is resx
+  let lookfrom = Vec3 (5,0.5,20) :: Vec3 Float Float Float --lookfrom, lookat, width, height and vup are magic numbers. so is resx
       lookat   = Vec3 (0,2,0) :: Vec3 Float Float Float
 
       star     = Sphere 1000000000 (Vec3 (0,1000001000,0)) (Lightsource (Vec3 (1,1,1)))
       s1      = Sphere 1 (Vec3 (0,1,0)) (Lambertian (Vec3 (0.5,0.5,0.5)))
-      s2      = Sphere 1 (Vec3 (2,1,0)) (Refractive 1.5)
+      s2      = Sphere 2 (Vec3 (3,2,0)) (Refractive 7)
+      s3      = Sphere 3 (Vec3 (-5,3,2)) Specular
       ground  = Sphere 10000 (Vec3 (0,-10000,0)) (Lambertian (Vec3 (0.2,0.8,0.2)))
 
-      spheres  = [ground,s1,star,s2]
+      spheres  = [ground,s1,star,s2,s3]
 
-      width    = 10 :: Float
-      height   = 5 :: Float
+      width    = 20 :: Float
+      height   = 10 :: Float
       vup      = unitVector $ Vec3 (0,1,0) :: Vec3 Float Float Float -- basically y axis but for the FOV
       w        = unitVector $ lookat - lookfrom
       u        = unitVector $ cross w vup -- basically x axis but for the FOV

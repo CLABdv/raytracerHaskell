@@ -74,7 +74,7 @@ bouncedRay s@(Sphere _ _ Specular) p (Ray rDir _ c) = do -- TODO: Implement diff
       d = unitVector rDir
       dirOut = d - scalarMul (2 * dot d g)  g
   return (Ray dirOut p (scalarMul 0.8 c))
-bouncedRay s@(Sphere _ o (Refractive i)) p (Ray rDir _ col) = do -- TODO: does not collide inside sphere
+bouncedRay s@(Sphere _ o (Refractive i)) p (Ray rDir _ col) = do -- TODO: needs to implement fresnels equations, to calculate the intensity of the rays reflected and refracted
   let r1 = 1/i -- Ratio of refractive indices, air to objects material
       r2 = i -- Ratio of refractive indices, objects material to air
       n1 = gradient s p -- First normal vector
@@ -84,9 +84,9 @@ bouncedRay s@(Sphere _ o (Refractive i)) p (Ray rDir _ col) = do -- TODO: does n
         Just a -> a
         Nothing -> error "Ray which was inside sphere could not collide with sphere. gg"
       n2 = gradient s p2
-  return (Ray (dirChange r2 n2 d1) p2 col)
+  return (Ray (dirChange r2 n2 d1) (p2 + scalarMul 0.001 n2) col)
   where dirChange r n l = newDir -- snell's law
-          where c = -dot n l
+          where c = abs $ dot n l
                 newDir = scalarMul r l + scalarMul (r*c - sqrt(1-r^2*(1-c^2))) n
 
 
