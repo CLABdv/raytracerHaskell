@@ -71,3 +71,8 @@ randVecInUnitSphere = do
   v <- randVec
   let l = vecLen v
   if l < 1 then return v else randVecInUnitSphere
+
+randUnitVec :: (Ord a, Floating a, Random a) => R (Vec3 a)
+randUnitVec = do
+  t <- randVecInUnitSphere
+  (return . unitVector) t

@@ -34,10 +34,11 @@ main = do
 
       width = 20 :: Float
       height = 10 :: Float
-      vup = unitVector $ Vec3 0 1 0 :: Vec3 Float -- basically y axis but for the FOV
+      vy = unitVector $ Vec3 1 1 0 :: Vec3 Float -- insert your desired y axis
       w = unitVector $ lookat - lookfrom
+      vup = unitVector $ vy - ((vy `dot` w) `scalarMul` w)
       u = unitVector $ cross w vup -- basically x axis but for the FOV
-      resx = 400 :: Int -- FOV width in actual pixels
+      resx = 800 :: Int -- FOV width in actual pixels
       resy = round ((fromIntegral resx / width) * height)
 
       -- lower left corner. the lookat position minus half the width times the 'x' unit vector
@@ -50,8 +51,8 @@ main = do
       rect = map (take resx . (\x -> genRow x $ scalarMul (width / fromIntegral resx) u)) firstCol
       rays = concatMap (map (\x -> Ray (x - lookfrom) lookfrom (Vec3 1 1 1))) rect
 
-      rpp = 100
-      bounces = 100
+      rpp = 10
+      bounces = 8
       cols = runRandom (colours spheres rays bounces rpp) seed
       finCols = map (roundVec . vecToCol) cols
   putStrLn $ ppmWrite resx resy finCols
