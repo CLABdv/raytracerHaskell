@@ -1,11 +1,13 @@
+{-# OPTIONS_GHC -Wno-name-shadowing #-}
+{-# HLINT ignore "Use map" #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
-{-# HLINT ignore "Use map" #-}
 module LightRay (module LightRay) where
 
-import Control.Monad.State.Lazy
-import Data.List (foldl', foldl1', transpose)
-import Data.Maybe (isJust, isNothing)
+import Control.Monad.Par
+import Control.Monad.State.Lazy (replicateM)
+import Data.List (foldl1')
+import Data.Maybe (isJust)
 import Helpers
 import Shapes
 import System.Random (Random)
@@ -13,6 +15,11 @@ import Vector3
 
 {-
 TODO: TODO: TODO: TODO: TODO:
+See if collide is improvable. About 70% of the time is spent in the collide
+function, it would be terrific if i could optimize it
+Rewrite collideObjects using folds.
+Rewrite cases.
+Rewrite rand. Is about 10% of time
 -}
 
 data Ray a = Ray {dir :: Vec3 a, origin :: Vec3 a, col :: Vec3 a}
@@ -20,8 +27,6 @@ data Ray a = Ray {dir :: Vec3 a, origin :: Vec3 a, col :: Vec3 a}
 
 type CollideInfo a = (Vec3 a, Vec3 a)
 
--- Checks for collision with object. Applies equation of a sphere and gets intersections with abc formula
--- Returns collision point and surface normal
 collide :: (Ord a, Floating a) => Object a -> Ray a -> Maybe (CollideInfo a)
 collide s@(Sphere r (Vec3 mx my mz) _) (Ray v@(Vec3 vx vy vz) o@(Vec3 ox oy oz) _)
   -- the checks for K being positive checks if the lightrays actually travel in the
@@ -40,10 +45,10 @@ collide s@(Sphere r (Vec3 mx my mz) _) (Ray v@(Vec3 vx vy vz) o@(Vec3 ox oy oz) 
     t1 = ox - mx
     t2 = oy - my
     t3 = oz - mz
-    a = vx ^ 2 + vy ^ 2 + vz ^ 2
+    a = vx ^ (2 :: Int) + vy ^ (2 :: Int) + vz ^ (2 :: Int)
     b = 2 * (vx * t1 + vy * t2 + vz * t3)
-    c = t1 ^ 2 + t2 ^ 2 + t3 ^ 2 - r ^ 2
-    det = b ^ 2 - 4 * a * c
+    c = t1 ^ (2 :: Int) + t2 ^ (2 :: Int) + t3 ^ (2 :: Int) - r ^ (2 :: Int)
+    det = b ^ (2 :: Int) - 4 * a * c
     detSqrt = sqrt det
     k1 = (-b + detSqrt) / (2 * a)
     k2 = (-b - detSqrt) / (2 * a)
@@ -52,12 +57,13 @@ collide s@(Sphere r (Vec3 mx my mz) _) (Ray v@(Vec3 vx vy vz) o@(Vec3 ox oy oz) 
     p1 = d1 + o
     p2 = d2 + o
 
+unsafeCollide :: (Ord a, Floating a) => Object a -> Ray a -> CollideInfo a
 unsafeCollide x y = case collide x y of
-  Just a -> a
-  Nothing -> error "Unsafe collide did not succeed"
+  ~(Just a) -> a
+
+-- Nothing -> error "Unsafe collide did not succeed"
 
 -- Given an object and its point of intersection, give the normal vector of the tangent plane
--- NOTE: Maybe remove unitvector from this function since that is not always desired.
 gradient :: Floating a => Object a -> Vec3 a -> Vec3 a
 gradient (Sphere _ c _) p = unitVector $ p - c
 
@@ -85,7 +91,7 @@ collideObjects o r@(Ray _ origin _) =
 -- Given an object, the point of intersection with that object and the ray that intersected the object,
 -- create a new ray with an origin at the bounce and appropriate new direction
 bouncedRay :: (Random a, Floating a, Ord a) => Object a -> CollideInfo a -> Ray a -> R (Ray a)
-bouncedRay s@(Sphere _ _ (Lambertian (Vec3 matR matG matB))) (p, g) r@(Ray _ _ rC@(Vec3 rayR rayG rayB)) = do
+bouncedRay (Sphere _ _ (Lambertian (Vec3 matR matG matB))) (p, g) (Ray _ _ (Vec3 rayR rayG rayB)) = do
   t <- randUnitVec
   -- Make sure that the new dir is not turning > 90 deg in any direction
   -- I thought this would be roughly equivalent to "if dot t g > 0 then t else negate t" but appearantly not
@@ -96,13 +102,13 @@ bouncedRay s@(Sphere _ _ (Lambertian (Vec3 matR matG matB))) (p, g) r@(Ray _ _ r
   return (Ray newDir p colMix)
 -- All colours are in the interval [0,1].
 -- This means that if the material colour is 1 all of the rays colour is kept, if it's less than one some of it is lost.
-bouncedRay s@(Sphere _ _ Specular) (p, g) (Ray rDir _ c) = do
+bouncedRay (Sphere _ _ Specular) (p, g) (Ray rDir _ c) = do
   -- TODO: Implement different colours
   let d = unitVector rDir
       dirOut = reflect d g
   return (Ray dirOut p (scalarMul 0.8 c))
 -- TODO: Rewrite this part. For instance, scalarMul 0.0035 norm should be resolved somewhere else
-bouncedRay s@(Sphere _ _ (Refractive i)) (p, g) (Ray rDir _ col) = do
+bouncedRay (Sphere _ _ (Refractive i)) (p, g) (Ray rDir _ col) = do
   refMaybe <- rand -- Interval [0,1], deciding if reflecting or not. See schlick's approx wikipedia.
   let isInc = dot g rDir < 0 -- This checks if the ray is incoming towards the object
   -- aka, if going from air to mat or mat to air
@@ -111,7 +117,7 @@ bouncedRay s@(Sphere _ _ (Refractive i)) (p, g) (Ray rDir _ col) = do
       unitRDir = unitVector rDir
       norm = if isInc then g else negate g
       cosTheta = dot (negate unitRDir) norm
-      sinTheta = sqrt (1 - cosTheta ^ 2)
+      sinTheta = sqrt (1 - cosTheta ^ (2 :: Int))
   return
     ( Ray
         ( if rri * sinTheta > 1.0 || refMaybe < schlicks cosTheta rri
@@ -122,9 +128,9 @@ bouncedRay s@(Sphere _ _ (Refractive i)) (p, g) (Ray rDir _ col) = do
         col
     )
   where
-    schlicks cosTheta rri = r0 + (1 - r0) * (1 - cosTheta) ^ 5
+    schlicks cosTheta rri = r0 + (1 - r0) * (1 - cosTheta) ^ (5 :: Int)
       where
-        r0 = ((1 - rri) / (1 + rri)) ^ 2
+        r0 = ((1 - rri) / (1 + rri)) ^ (2 :: Int)
 
 -- NOTE: Observe that reflect and refract functions both expect all vectors to be unitvectors.
 reflect :: Num a => Vec3 a -> Vec3 a -> Vec3 a
@@ -138,11 +144,47 @@ refract rIn norm rri = rPerpendicular + rParallell
     rPerpendicular = scalarMul rri (rIn + scalarMul (dot (negate rIn) norm) norm)
     rParallell = scalarMul (-sqrt (1 - sqVecLen rPerpendicular)) norm
 
-colours :: (Random a, Ord a, Floating a) => [Object a] -> [Ray a] -> Int -> Int -> R [Vec3 a]
-colours o r bounces rpp = do
-  eles <- replicateM rpp (mapM (\x -> cases o 0 x bounces) r)
-  let t = foldl1' (zipWith (+)) eles
-  return $ map (scalarDiv $ fromIntegral rpp) t
+colour :: (Random a, Ord a, Floating a) => [Object a] -> Int -> Int -> Ray a -> R (Vec3 a)
+colour o bounces rpp r = do
+  eles <- replicateM rpp (cases o 0 r bounces)
+  let t = foldl1' (+) eles
+  return $ (scalarDiv $ fromIntegral rpp) t
+
+colours ::
+  (Random a, Ord a, Floating a) =>
+  [Object a] ->
+  Int ->
+  Int ->
+  [Ray a] ->
+  R [Vec3 a]
+colours o bounces rpp = mapM (colour o bounces rpp)
+
+-- TODO: Would be prettier to have this be in the random monad, and save the runrandom for later.
+coloursPar ::
+  (Random a, Ord a, Floating a, NFData a) =>
+  [Object a] ->
+  Int ->
+  Int ->
+  [Int] ->
+  [Ray a] ->
+  [Vec3 a]
+coloursPar o bounces rpp seeds rs = runPar (parMap (\(x, y) -> runRandom (colour o bounces rpp x) y) (zip rs seeds))
+
+-- coloursPar' o bounces rpp rs = runPar (parMap (colour o bounces rpp) rs)
+
+{-
+colourPar :: (NFData a, Random a, Ord a, Floating a) => [Object a] -> Ray a -> Int -> Int -> [Int] -> Vec3 a
+colourPar os r bounces rpp seeds =
+  let t = runPar $ do
+        alpha <- spawnP $ foldl1' (+) $ runRandom (replicateM nThreadRays $ cases os 0 r bounces) (head seeds)
+        let beta = foldl1' (+) $ runRandom (replicateM nThreadRays $ cases os 0 r bounces) (231 + seeds !! 1)
+            _ = rnf beta
+        gamma <- get alpha
+        return (beta, gamma)
+   in scalarDiv 2 (uncurry (+) t)
+  where
+    nThreadRays = rpp `div` 2
+-}
 
 cases :: (Random a, Ord a, Floating a, Integral b) => [Object a] -> b -> Ray a -> b -> R (Vec3 a)
 cases o count currR maxBounce

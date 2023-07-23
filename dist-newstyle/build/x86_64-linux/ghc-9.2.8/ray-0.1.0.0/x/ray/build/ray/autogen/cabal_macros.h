@@ -20,6 +20,26 @@
   (major1) == 4 && (major2) <  16 || \
   (major1) == 4 && (major2) == 16 && (minor) <= 4)
 #endif /* MIN_VERSION_base */
+/* package deepseq-1.4.6.1 */
+#ifndef VERSION_deepseq
+#define VERSION_deepseq "1.4.6.1"
+#endif /* VERSION_deepseq */
+#ifndef MIN_VERSION_deepseq
+#define MIN_VERSION_deepseq(major1,major2,minor) (\
+  (major1) <  1 || \
+  (major1) == 1 && (major2) <  4 || \
+  (major1) == 1 && (major2) == 4 && (minor) <= 6)
+#endif /* MIN_VERSION_deepseq */
+/* package monad-par-0.3.5 */
+#ifndef VERSION_monad_par
+#define VERSION_monad_par "0.3.5"
+#endif /* VERSION_monad_par */
+#ifndef MIN_VERSION_monad_par
+#define MIN_VERSION_monad_par(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  3 || \
+  (major1) == 0 && (major2) == 3 && (minor) <= 5)
+#endif /* MIN_VERSION_monad_par */
 /* package mtl-2.2.2 */
 #ifndef VERSION_mtl
 #define VERSION_mtl "2.2.2"

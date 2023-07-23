@@ -3,6 +3,7 @@ module Vector3 (module Vector3) where
 -- TODO:
 -- Implement scalarDiv
 
+import Control.DeepSeq
 import Helpers
 import System.Random (Random)
 
@@ -15,13 +16,16 @@ instance Num a => Num (Vec3 a) where
   Vec3 a b c + Vec3 i j k = Vec3 (a + i) (b + j) (c + k)
   Vec3 a b c - Vec3 i j k = Vec3 (a - i) (b - j) (c - k)
 
-  Vec3 a b c * Vec3 i j k =
+  Vec3 {} * Vec3 {} =
     error
       "Do not use '*' to multiply two vectors. use cross or dot instead (or if with a scalar, scalarMul)"
   abs (Vec3 a b c) = Vec3 (abs a) (abs b) (abs c)
   signum (Vec3 a b c) = Vec3 (signum a) (signum b) (signum c)
   fromInteger i = Vec3 (fromInteger i) (fromInteger i) (fromInteger i)
   negate (Vec3 a b c) = Vec3 (-a) (-b) (-c)
+
+instance NFData a => NFData (Vec3 a) where
+  rnf (Vec3 i j k) = i `deepseq` j `deepseq` k `deepseq` ()
 
 -- cross multiplication of two vectors
 cross :: Num a => Vec3 a -> Vec3 a -> Vec3 a

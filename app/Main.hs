@@ -1,10 +1,8 @@
 module Main where
 
-import Data.Maybe
-import Helpers
 import LightRay
 import Shapes
-import System.Random (Random, StdGen, mkStdGen, random, randomIO)
+import System.Random (randomIO)
 import Vector3
 
 main :: IO ()
@@ -36,7 +34,7 @@ main = do
       height = 10 :: Float
       vy = unitVector $ Vec3 1 1 0 :: Vec3 Float -- insert your desired y axis
       w = unitVector $ lookat - lookfrom
-      vup = unitVector $ vy - ((vy `dot` w) `scalarMul` w)
+      vup = unitVector $ vy - ((vy `dot` w) `scalarMul` w) -- basically removes the w component from vy so that its perp to w
       u = unitVector $ cross w vup -- basically x axis but for the FOV
       resx = 800 :: Int -- FOV width in actual pixels
       resy = round ((fromIntegral resx / width) * height)
@@ -51,9 +49,9 @@ main = do
       rect = map (take resx . (\x -> genRow x $ scalarMul (width / fromIntegral resx) u)) firstCol
       rays = concatMap (map (\x -> Ray (x - lookfrom) lookfrom (Vec3 1 1 1))) rect
 
-      rpp = 10
-      bounces = 8
-      cols = runRandom (colours spheres rays bounces rpp) seed
+      rpp = 10 :: Int
+      bounces = 8 :: Int
+      cols = coloursPar spheres bounces rpp [seed ..] rays
       finCols = map (roundVec . vecToCol) cols
   putStrLn $ ppmWrite resx resy finCols
 
