@@ -1,8 +1,9 @@
 module Main where
 
+import Helpers (runRandom)
 import LightRay
 import Shapes
-import System.Random (randomIO)
+import System.Random
 import Vector3
 
 main :: IO ()
@@ -51,7 +52,8 @@ main = do
 
       rpp = 10 :: Int
       bounces = 8 :: Int
-      cols = coloursPar spheres bounces rpp [seed ..] rays
+      cols = coloursPar spheres bounces rpp (randoms (mkStdGen seed)) rays
+      -- cols = runRandom (colours spheres bounces rpp rays) seed
       finCols = map (roundVec . vecToCol) cols
   putStrLn $ ppmWrite resx resy finCols
 
@@ -67,7 +69,9 @@ genRow :: Num a => Vec3 a -> Vec3 a -> [Vec3 a]
 genRow base step = base : genRow (base + step) step
 
 vecToCol :: (Num a, Ord a) => Vec3 a -> Vec3 a
-vecToCol (Vec3 a b c) = scalarMul 255 (Vec3 (max a 0) (max b 0) (max c 0)) -- if negative, instead do 0
+vecToCol (Vec3 a b c) = scalarMul 255 (Vec3 (max a 0) (max b 0) (max c 0))
+  where
+    clamp n = max (min n 1) 0
 
 roundVec :: (RealFrac a, Integral b) => Vec3 a -> Vec3 b
 roundVec (Vec3 a b c) = Vec3 (round a) (round b) (round c)

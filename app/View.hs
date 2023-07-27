@@ -1,4 +1,4 @@
-module View where
+module View (module View) where
 
 import Vector3
 

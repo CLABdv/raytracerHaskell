@@ -18,8 +18,7 @@ TODO: TODO: TODO: TODO: TODO:
 See if collide is improvable. About 70% of the time is spent in the collide
 function, it would be terrific if i could optimize it
 Rewrite collideObjects using folds.
-Rewrite cases.
-Rewrite rand. Is about 10% of time
+Rewrite rand. Is about 10% of time spent
 -}
 
 data Ray a = Ray {dir :: Vec3 a, origin :: Vec3 a, col :: Vec3 a}
@@ -28,7 +27,7 @@ data Ray a = Ray {dir :: Vec3 a, origin :: Vec3 a, col :: Vec3 a}
 type CollideInfo a = (Vec3 a, Vec3 a)
 
 collide :: (Ord a, Floating a) => Object a -> Ray a -> Maybe (CollideInfo a)
-collide s@(Sphere r (Vec3 mx my mz) _) (Ray v@(Vec3 vx vy vz) o@(Vec3 ox oy oz) _)
+collide s@(Sphere r m _) (Ray v o _)
   -- the checks for K being positive checks if the lightrays actually travel in the
   -- vectors direction, if its negative they travel backwards
   | det < 0 = Nothing
@@ -40,18 +39,16 @@ collide s@(Sphere r (Vec3 mx my mz) _) (Ray v@(Vec3 vx vy vz) o@(Vec3 ox oy oz) 
   | k2 >= 0 = Just (p2, gradient s p2)
   | otherwise = Nothing
   where
-    -- Magic numbers. Solving the abc formula.
+    -- Magic numbers. Solving the abc formula. NOTE: Not really abc formula, simplified it a bit
     -- t[1-3] are temp vars
-    t1 = ox - mx
-    t2 = oy - my
-    t3 = oz - mz
-    a = vx ^ (2 :: Int) + vy ^ (2 :: Int) + vz ^ (2 :: Int)
-    b = 2 * (vx * t1 + vy * t2 + vz * t3)
-    c = t1 ^ (2 :: Int) + t2 ^ (2 :: Int) + t3 ^ (2 :: Int) - r ^ (2 :: Int)
-    det = b ^ (2 :: Int) - 4 * a * c
-    detSqrt = sqrt det
-    k1 = (-b + detSqrt) / (2 * a)
-    k2 = (-b - detSqrt) / (2 * a)
+    t = o - m
+    a = sqVecLen v
+    b = dot v t -- really b/2
+    c = sqVecLen t - r * r
+    det = b * b - a * c
+    detSqrt = sqrt det -- lazy evaluation rocks
+    k1 = (-b + detSqrt) / a
+    k2 = (-b - detSqrt) / a
     d1 = scalarMul k1 v
     d2 = scalarMul k2 v
     p1 = d1 + o
@@ -160,6 +157,7 @@ colours ::
 colours o bounces rpp = mapM (colour o bounces rpp)
 
 -- TODO: Would be prettier to have this be in the random monad, and save the runrandom for later.
+-- Would probably (very probably) be more efficient too
 coloursPar ::
   (Random a, Ord a, Floating a, NFData a) =>
   [Object a] ->
@@ -169,22 +167,6 @@ coloursPar ::
   [Ray a] ->
   [Vec3 a]
 coloursPar o bounces rpp seeds rs = runPar (parMap (\(x, y) -> runRandom (colour o bounces rpp x) y) (zip rs seeds))
-
--- coloursPar' o bounces rpp rs = runPar (parMap (colour o bounces rpp) rs)
-
-{-
-colourPar :: (NFData a, Random a, Ord a, Floating a) => [Object a] -> Ray a -> Int -> Int -> [Int] -> Vec3 a
-colourPar os r bounces rpp seeds =
-  let t = runPar $ do
-        alpha <- spawnP $ foldl1' (+) $ runRandom (replicateM nThreadRays $ cases os 0 r bounces) (head seeds)
-        let beta = foldl1' (+) $ runRandom (replicateM nThreadRays $ cases os 0 r bounces) (231 + seeds !! 1)
-            _ = rnf beta
-        gamma <- get alpha
-        return (beta, gamma)
-   in scalarDiv 2 (uncurry (+) t)
-  where
-    nThreadRays = rpp `div` 2
--}
 
 cases :: (Random a, Ord a, Floating a, Integral b) => [Object a] -> b -> Ray a -> b -> R (Vec3 a)
 cases o count currR maxBounce

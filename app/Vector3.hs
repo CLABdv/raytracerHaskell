@@ -30,29 +30,36 @@ instance NFData a => NFData (Vec3 a) where
 -- cross multiplication of two vectors
 cross :: Num a => Vec3 a -> Vec3 a -> Vec3 a
 cross (Vec3 a b c) (Vec3 i j k) = Vec3 (b * k - c * j) (i * c - a * k) (a * j - b * i)
+{-# INLINE cross #-}
 
 -- dot multiplication of two vectors
 dot :: Num a => Vec3 a -> Vec3 a -> a
 dot (Vec3 a b c) (Vec3 i j k) = a * i + b * j + c * k
+{-# INLINE dot #-}
 
 scalarMul :: Num a => a -> Vec3 a -> Vec3 a
 scalarMul s (Vec3 a b c) = Vec3 (a * s) (b * s) (c * s)
+{-# INLINE scalarMul #-}
 
 scalarDiv :: Fractional a => a -> Vec3 a -> Vec3 a
 scalarDiv s (Vec3 a b c) = Vec3 (a / s) (b / s) (c / s)
+{-# INLINE scalarDiv #-}
 
 -- gives the squared vector length. This is useful cuz taking the square root is slow and is not always needed
 sqVecLen :: Floating a => Vec3 a -> a
-sqVecLen (Vec3 a b c) = a ^ 2 + b ^ 2 + c ^ 2
+sqVecLen (Vec3 a b c) = a * a + b * b + c * c
+{-# INLINE sqVecLen #-}
 
 vecLen :: Floating a => Vec3 a -> a
 vecLen = sqrt . sqVecLen
+{-# INLINE vecLen #-}
 
 -- Produce a unit vector given a vector
 unitVector :: Floating a => Vec3 a -> Vec3 a
 unitVector r@(Vec3 a b c) = Vec3 (a / l) (b / l) (c / l)
   where
     l = vecLen r
+{-# INLINE unitVector #-}
 
 randVec :: Random a => R (Vec3 a)
 randVec = do
@@ -80,3 +87,4 @@ randUnitVec :: (Ord a, Floating a, Random a) => R (Vec3 a)
 randUnitVec = do
   t <- randVecInUnitSphere
   (return . unitVector) t
+{-# INLINE randUnitVec #-}
