@@ -5,6 +5,7 @@ import LightRay
 import Shapes
 import System.Random
 import Vector3
+import View
 
 main :: IO ()
 main = do
@@ -18,6 +19,7 @@ main = do
 
   For light, make it so that bounced rays have a bias to go towards lightsources, which depends on the sources strengths.
   (or something)
+  fix the random generator, it's slow and noticably not random enough
   -}
   seed <- randomIO :: IO Int
   let lookfrom = Vec3 (-5.2) 1.2 (-1.2) :: Vec3 Float -- lookfrom, lookat, width, height and vup are magic numbers. so is resx
@@ -34,20 +36,11 @@ main = do
       width = 20 :: Float
       height = 10 :: Float
       vy = unitVector $ Vec3 1 1 0 :: Vec3 Float -- insert your desired y axis
-      w = unitVector $ lookat - lookfrom
-      vup = unitVector $ vy - ((vy `dot` w) `scalarMul` w) -- basically removes the w component from vy so that its perp to w
-      u = unitVector $ cross w vup -- basically x axis but for the FOV
       resx = 800 :: Int -- FOV width in actual pixels
       resy = round ((fromIntegral resx / width) * height)
 
-      -- lower left corner. the lookat position minus half the width times the 'x' unit vector
-      -- minus half the height times the 'y' unit vector.
-      llc = lookat - scalarMul (width * 0.5) u - scalarMul (height * 0.5) vup :: Vec3 Float
-      -- HACK: I reverse the list to make up be upwards instead of up being downwards.
-      -- generates the columns furthest to the left.
-      firstCol = reverse $ take resy $ genRow llc $ scalarMul (height / fromIntegral resy) vup
-      -- full rectangle of all points from bot left to top right
-      rect = map (take resx . (\x -> genRow x $ scalarMul (width / fromIntegral resx) u)) firstCol
+      cam = createCamera lookfrom lookat vy height width resx
+      rect = createRect cam
       rays = concatMap (map (\x -> Ray (x - lookfrom) lookfrom (Vec3 1 1 1))) rect
 
       rpp = 10 :: Int
@@ -70,8 +63,6 @@ genRow base step = base : genRow (base + step) step
 
 vecToCol :: (Num a, Ord a) => Vec3 a -> Vec3 a
 vecToCol (Vec3 a b c) = scalarMul 255 (Vec3 (max a 0) (max b 0) (max c 0))
-  where
-    clamp n = max (min n 1) 0
 
 roundVec :: (RealFrac a, Integral b) => Vec3 a -> Vec3 b
 roundVec (Vec3 a b c) = Vec3 (round a) (round b) (round c)

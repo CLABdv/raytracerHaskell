@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wno-name-shadowing #-}
 {-# HLINT ignore "Use map" #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
