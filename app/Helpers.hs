@@ -12,7 +12,6 @@ type R a = State StdGen a
 runRandom :: R a -> Int -> a
 runRandom action seed = evalState action $ mkStdGen seed
 
--- TODO: Fix this, it's quality is quite horrendous
 rand :: Random a => R a
 rand = do
   gen <- get

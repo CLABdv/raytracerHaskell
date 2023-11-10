@@ -1,5 +1,10 @@
 module Vector3 (module Vector3) where
 
+-- BUG
+-- IMPORTANT:
+-- Random vector utilities do not generate negative numbers. Numbers are in range [0,1[
+-- Change this to be [-1,1]
+
 -- TODO:
 -- Implement scalarDiv
 
@@ -14,11 +19,12 @@ data Vec3 a = Vec3 {x :: !a, y :: !a, z :: !a}
 
 instance Num a => Num (Vec3 a) where
   Vec3 a b c + Vec3 i j k = Vec3 (a + i) (b + j) (c + k)
+  {-# INLINE (+) #-}
   Vec3 a b c - Vec3 i j k = Vec3 (a - i) (b - j) (c - k)
+  {-# INLINE (-) #-}
 
-  Vec3 {} * Vec3 {} =
-    error
-      "Do not use '*' to multiply two vectors. use cross or dot instead (or if with a scalar, scalarMul)"
+  Vec3 a b c * Vec3 i j k = Vec3 (a * i) (b * j) (c * k) -- Elementwise multiplication.
+  {-# INLINE (*) #-}
   abs (Vec3 a b c) = Vec3 (abs a) (abs b) (abs c)
   signum (Vec3 a b c) = Vec3 (signum a) (signum b) (signum c)
   fromInteger i = Vec3 (fromInteger i) (fromInteger i) (fromInteger i)
@@ -61,12 +67,22 @@ unitVector r@(Vec3 a b c) = Vec3 (a / l) (b / l) (c / l)
     l = vecLen r
 {-# INLINE unitVector #-}
 
-randVec :: Random a => R (Vec3 a)
+randVec :: (Random a, Floating a) => R (Vec3 a)
 randVec = do
   x <- rand
   y <- rand
   z <- rand
-  return $ Vec3 x y z
+  return $ Vec3 (x) (y) (z)
+
+randInUnitDisc :: (Floating a, Ord a, Random a) => R (a, a)
+randInUnitDisc = do
+  x <- rand
+  y <- rand
+  let a = x
+      b = y
+  if a * a + b * b < 1
+    then return (a, b)
+    else randInUnitDisc
 
 {-
 Returns a vector of length < 1

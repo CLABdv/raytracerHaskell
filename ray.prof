@@ -1,259 +1,260 @@
-	Thu Jul 27 20:02 2023 Time and Allocation Profiling Report  (Final)
+	Tue Aug  1 15:46 2023 Time and Allocation Profiling Report  (Final)
 
-	   ray +RTS -p -RTS
+	   ray +RTS -N -s -p -RTS
 
-	total time  =       15.25 secs   (15250 ticks @ 1000 us, 1 processor)
-	total alloc = 34,462,413,392 bytes  (excludes profiling overheads)
+	total time  =       94.46 secs   (349986 ticks @ 1000 us, 8 processors)
+	total alloc = 61,100,018,008 bytes  (excludes profiling overheads)
 
-COST CENTRE            MODULE                 SRC                                             %time %alloc
+COST CENTRE    MODULE    SRC                             %time %alloc
 
-collide                LightRay               app/LightRay.hs:(30,1)-(55,15)                   17.6   16.6
-collide.c              LightRay               app/LightRay.hs:47:5-26                           9.5   10.8
-collide.b              LightRay               app/LightRay.hs:46:5-15                           7.9    8.9
-collide.a              LightRay               app/LightRay.hs:45:5-18                           7.1    7.5
-bouncedRay             LightRay               app/LightRay.hs:(91,1)-(130,49)                   5.0    4.2
-collide.det            LightRay               app/LightRay.hs:48:5-23                           4.4    4.2
-collideObjects         LightRay               app/LightRay.hs:(71,1)-(86,86)                    3.2    5.0
-randVecInUnitSphere.l  Vector3                app/Vector3.hs:83:7-18                            3.1    2.4
-bouncedRay.colMix      LightRay               app/LightRay.hs:98:7-109                          3.1    2.2
-collide.k1             LightRay               app/LightRay.hs:50:5-33                           3.0    2.6
-collide.k2             LightRay               app/LightRay.hs:51:5-33                           2.8    2.6
-randVec                Vector3                app/Vector3.hs:(65,1)-(69,21)                     2.5    2.4
-rand.(...)             Helpers                app/Helpers.hs:19:7-28                            2.4    1.8
-cases                  LightRay               app/LightRay.hs:(171,1)-(180,26)                  2.1    1.3
-colour                 LightRay               app/LightRay.hs:(145,1)-(148,43)                  2.0    2.5
-bouncedRay.newDir      LightRay               app/LightRay.hs:96:7-33                           1.9    2.1
-nextWord32             System.Random.SplitMix src/System/Random/SplitMix.hs:(129,1)-(136,28)    1.9    3.2
-collide.t              LightRay               app/LightRay.hs:44:5-13                           1.8    1.1
-rand                   Helpers                app/Helpers.hs:(17,1)-(21,10)                     1.5    2.9
--                      Vector3                app/Vector3.hs:17:3-56                            1.5    1.9
-randVecInUnitSphere    Vector3                app/Vector3.hs:(81,1)-(84,49)                     1.5    1.1
-collide.d2             LightRay               app/LightRay.hs:53:5-23                           1.2    0.6
-collideObjects.closest LightRay               app/LightRay.hs:(76,5)-(86,86)                    1.2    1.5
-collide.d1             LightRay               app/LightRay.hs:52:5-23                           1.1    0.6
-+                      Vector3                app/Vector3.hs:16:3-56                            1.1    1.2
-gradient               LightRay               app/LightRay.hs:65:1-46                           1.0    0.7
-nextWord64             System.Random.SplitMix src/System/Random/SplitMix.hs:(121,1)-(123,29)    0.8    1.8
-ppmWrite.writeInfo     Main                   app/Main.hs:(61,5)-(62,100)                       0.2    1.0
+collide.c      LightRay  app/LightRay.hs:54:5-26          33.7   21.3
+collide.b      LightRay  app/LightRay.hs:53:5-15          23.2   21.5
+collide        LightRay  app/LightRay.hs:(37,1)-(62,15)   12.7   20.7
+-              Vector3   app/Vector3.hs:18:3-56           12.3    7.7
+collide.disc   LightRay  app/LightRay.hs:55:5-24          11.0   13.1
+collideObjects LightRay  app/LightRay.hs:(72,1)-(87,24)    3.8   11.6
+collide.t      LightRay  app/LightRay.hs:51:5-13           1.0    0.0
 
 
-                                                                                                                                                      individual      inherited
-COST CENTRE                       MODULE                                 SRC                                                       no.     entries  %time %alloc   %time %alloc
+                                                                                                                                individual      inherited
+COST CENTRE                      MODULE                      SRC                                             no.     entries  %time %alloc   %time %alloc
 
-MAIN                              MAIN                                   <built-in>                                                186           0    0.0    0.0   100.0  100.0
- CAF                              Main                                   <entire-module>                                           367           0    0.0    0.0     0.6    0.4
-  main                            Main                                   app/Main.hs:(9,1)-(56,39)                                 372           1    0.0    0.0     0.6    0.4
-   main.bounces                   Main                                   app/Main.hs:53:7-24                                       427           1    0.0    0.0     0.0    0.0
-   main.firstCol                  Main                                   app/Main.hs:47:7-94                                       399           1    0.0    0.0     0.0    0.0
-    genRow                        Main                                   app/Main.hs:67:1-51                                       400         400    0.0    0.0     0.0    0.0
-     +                            Vector3                                app/Vector3.hs:16:3-56                                    506         399    0.0    0.0     0.0    0.0
-   main.ground                    Main                                   app/Main.hs:29:7-79                                       432           1    0.0    0.0     0.0    0.0
-   main.height                    Main                                   app/Main.hs:34:7-26                                       386           1    0.0    0.0     0.0    0.0
-   main.llc                       Main                                   app/Main.hs:44:7-91                                       435           1    0.0    0.0     0.0    0.0
-    -                             Vector3                                app/Vector3.hs:17:3-56                                    444           2    0.0    0.0     0.0    0.0
-   main.lookat                    Main                                   app/Main.hs:23:7-42                                       436           1    0.0    0.0     0.0    0.0
-   main.lookfrom                  Main                                   app/Main.hs:22:7-53                                       439           1    0.0    0.0     0.0    0.0
-   main.rays                      Main                                   app/Main.hs:50:7-82                                       397           1    0.0    0.1     0.3    0.2
-    main.rays.\                   Main                                   app/Main.hs:50:36-75                                      429      320000    0.3    0.1     0.3    0.1
-     -                            Vector3                                app/Vector3.hs:17:3-56                                    446      320000    0.0    0.0     0.0    0.0
-   main.rect                      Main                                   app/Main.hs:49:7-98                                       398           1    0.0    0.1     0.3    0.2
-    main.rect.\                   Main                                   app/Main.hs:49:38-87                                      401         400    0.0    0.0     0.3    0.2
-     genRow                       Main                                   app/Main.hs:67:1-51                                       402      320000    0.3    0.2     0.3    0.2
-      +                           Vector3                                app/Vector3.hs:16:3-56                                    445      319600    0.0    0.0     0.0    0.0
-   main.resx                      Main                                   app/Main.hs:39:7-23                                       383           1    0.0    0.0     0.0    0.0
-   main.resy                      Main                                   app/Main.hs:40:7-57                                       384           1    0.0    0.0     0.0    0.0
-   main.rpp                       Main                                   app/Main.hs:52:7-21                                       425           1    0.0    0.0     0.0    0.0
-   main.s1                        Main                                   app/Main.hs:26:7-64                                       457           1    0.0    0.0     0.0    0.0
-   main.s2                        Main                                   app/Main.hs:27:7-52                                       459           1    0.0    0.0     0.0    0.0
-   main.s3                        Main                                   app/Main.hs:28:7-41                                       460           1    0.0    0.0     0.0    0.0
-   main.spheres                   Main                                   app/Main.hs:31:7-42                                       430           1    0.0    0.0     0.0    0.0
-   main.star                      Main                                   app/Main.hs:25:7-79                                       458           1    0.0    0.0     0.0    0.0
-   main.u                         Main                                   app/Main.hs:38:7-34                                       437           1    0.0    0.0     0.0    0.0
-   main.vup                       Main                                   app/Main.hs:37:7-58                                       441           1    0.0    0.0     0.0    0.0
-    -                             Vector3                                app/Vector3.hs:17:3-56                                    443           1    0.0    0.0     0.0    0.0
-   main.vy                        Main                                   app/Main.hs:35:7-48                                       442           1    0.0    0.0     0.0    0.0
-   main.w                         Main                                   app/Main.hs:36:7-40                                       438           1    0.0    0.0     0.0    0.0
-    -                             Vector3                                app/Vector3.hs:17:3-56                                    440           1    0.0    0.0     0.0    0.0
-   main.width                     Main                                   app/Main.hs:33:7-25                                       385           1    0.0    0.0     0.0    0.0
- CAF                              Control.Monad.Par.Scheds.TraceInternal <entire-module>                                           365           0    0.0    0.0     0.0    0.0
-  new                             Control.Monad.Par.Scheds.TraceInternal Control/Monad/Par/Scheds/TraceInternal.hs:315:1-22        408           1    0.0    0.0     0.0    0.0
-  runPar                          Control.Monad.Par.Scheds.TraceInternal Control/Monad/Par/Scheds/TraceInternal.hs:295:1-47        390           1    0.0    0.0     0.0    0.0
- CAF                              System.Random.Internal                 <entire-module>                                           361           0    0.0    0.0     0.0    0.0
-  mkStdGen                        System.Random.Internal                 src/System/Random/Internal.hs:583:1-45                    479           1    0.0    0.0     0.0    0.0
-  theStdGen                       System.Random.Internal                 src/System/Random/Internal.hs:587:1-64                    376           1    0.0    0.0     0.0    0.0
-   initSMGen                      System.Random.SplitMix                 src/System/Random/SplitMix.hs:381:1-36                    378           0    0.0    0.0     0.0    0.0
-    mkSMGen                       System.Random.SplitMix                 src/System/Random/SplitMix.hs:377:1-61                    381           1    0.0    0.0     0.0    0.0
- CAF                              System.Random.SplitMix                 <entire-module>                                           359           0    0.0    0.0     0.0    0.0
-  initSMGen                       System.Random.SplitMix                 src/System/Random/SplitMix.hs:381:1-36                    377           1    0.0    0.0     0.0    0.0
- CAF                              System.Random.SplitMix.Init            <entire-module>                                           357           0    0.0    0.0     0.0    0.0
-  initialSeed                     System.Random.SplitMix.Init            src/System/Random/SplitMix/Init.hs:40:1-26                379           1    0.0    0.0     0.0    0.0
- CAF                              GHC.Conc.Signal                        <entire-module>                                           302           0    0.0    0.0     0.0    0.0
- CAF                              GHC.Conc.Sync                          <entire-module>                                           301           0    0.0    0.0     0.0    0.0
- CAF                              GHC.IO.Encoding                        <entire-module>                                           286           0    0.0    0.0     0.0    0.0
- CAF                              GHC.IO.Encoding.Iconv                  <entire-module>                                           284           0    0.0    0.0     0.0    0.0
- CAF                              GHC.IO.Handle.FD                       <entire-module>                                           276           0    0.0    0.0     0.0    0.0
- CAF                              GHC.IO.Handle.Text                     <entire-module>                                           274           0    0.0    0.0     0.0    0.0
- CAF                              GHC.Event.Thread                       <entire-module>                                           233           0    0.0    0.0     0.0    0.0
- CAF                              GHC.Event.Poll                         <entire-module>                                           208           0    0.0    0.0     0.0    0.0
- main                             Main                                   app/Main.hs:(9,1)-(56,39)                                 373           0    0.1    0.0    99.4   99.6
-  main.cols                       Main                                   app/Main.hs:54:7-58                                       388           1    0.0    0.1    98.9   98.3
-   coloursPar                     LightRay                               app/LightRay.hs:168:1-116                                 389           1    0.1    0.1    98.9   98.3
-    parMap                        Control.Monad.Par.Combinator           Control/Monad/Par/Combinator.hs:41:1-47                   394           1    0.1    0.2    98.0   97.3
-     coloursPar.\                 LightRay                               app/LightRay.hs:168:64-99                                 420      320000    0.0    0.0    97.7   97.0
-      colour                      LightRay                               app/LightRay.hs:(145,1)-(148,43)                          421      320000    0.2    0.2     9.9    9.2
-       cases                      LightRay                               app/LightRay.hs:(171,1)-(180,26)                          426      320000    0.2    0.1     9.7    9.0
-        collideObjects            LightRay                               app/LightRay.hs:(71,1)-(86,86)                            428      320000    0.4    0.7     9.1    8.7
-         collide                  LightRay                               app/LightRay.hs:(30,1)-(55,15)                            431     1600000    2.5    2.1     8.6    7.8
-          collide.a               LightRay                               app/LightRay.hs:45:5-18                                   449     1600000    1.0    1.0     1.0    1.0
-          collide.b               LightRay                               app/LightRay.hs:46:5-15                                   434     1600000    1.1    1.2     1.1    1.2
-          collide.c               LightRay                               app/LightRay.hs:47:5-26                                   450     1600000    1.2    1.4     1.2    1.4
-          collide.det             LightRay                               app/LightRay.hs:48:5-23                                   433     1600000    0.6    0.6     0.6    0.6
-          collide.t               LightRay                               app/LightRay.hs:44:5-13                                   447     1600000    0.3    0.1     0.5    0.4
-           -                      Vector3                                app/Vector3.hs:17:3-56                                    448     1600000    0.2    0.2     0.2    0.2
-          collide.detSqrt         LightRay                               app/LightRay.hs:49:5-22                                   452      648185    0.1    0.0     0.1    0.0
-          collide.k1              LightRay                               app/LightRay.hs:50:5-33                                   451      648185    0.4    0.3     0.4    0.3
-          collide.k2              LightRay                               app/LightRay.hs:51:5-33                                   453      648185    0.4    0.3     0.4    0.3
-          collide.d1              LightRay                               app/LightRay.hs:52:5-23                                   454      332371    0.1    0.1     0.1    0.1
-          collide.d2              LightRay                               app/LightRay.hs:53:5-23                                   455      332371    0.2    0.1     0.2    0.1
-          collide.p2              LightRay                               app/LightRay.hs:55:5-15                                   485      185600    0.0    0.0     0.1    0.0
-           +                      Vector3                                app/Vector3.hs:16:3-56                                    486      185600    0.0    0.0     0.0    0.0
-          gradient                LightRay                               app/LightRay.hs:65:1-46                                   484      172196    0.4    0.2     0.4    0.2
-           -                      Vector3                                app/Vector3.hs:17:3-56                                    487      172196    0.0    0.0     0.0    0.0
-         collideObjects.closest   LightRay                               app/LightRay.hs:(76,5)-(86,86)                            456      652371    0.2    0.2     0.2    0.2
-          +                       Vector3                                app/Vector3.hs:16:3-56                                    490      172196    0.0    0.0     0.0    0.0
-          -                       Vector3                                app/Vector3.hs:17:3-56                                    507       30930    0.0    0.0     0.0    0.0
-        bouncedRay                LightRay                               app/LightRay.hs:(91,1)-(130,49)                           463      170135    0.1    0.1     0.3    0.2
-         bouncedRay.d             LightRay                               app/LightRay.hs:104:7-25                                  508        5614    0.0    0.0     0.0    0.0
-         bouncedRay.dirOut        LightRay                               app/LightRay.hs:105:7-26                                  509        5614    0.0    0.0     0.0    0.0
-          reflect                 LightRay                               app/LightRay.hs:134:1-58                                  510        5614    0.0    0.0     0.0    0.0
-           -                      Vector3                                app/Vector3.hs:17:3-56                                    511        5614    0.0    0.0     0.0    0.0
-         -                        Vector3                                app/Vector3.hs:17:3-56                                    539        5400    0.0    0.0     0.0    0.0
-         bouncedRay.cosTheta      LightRay                               app/LightRay.hs:116:7-43                                  520        5400    0.0    0.0     0.0    0.0
-          negate                  Vector3                                app/Vector3.hs:25:3-43                                    522        5400    0.0    0.0     0.0    0.0
-         bouncedRay.isInc         LightRay                               app/LightRay.hs:110:7-28                                  518        5400    0.0    0.0     0.0    0.0
-         bouncedRay.norm          LightRay                               app/LightRay.hs:115:7-42                                  523        5400    0.0    0.0     0.0    0.0
-         bouncedRay.rri           LightRay                               app/LightRay.hs:113:7-38                                  517        5400    0.0    0.0     0.0    0.0
-         bouncedRay.sinTheta      LightRay                               app/LightRay.hs:117:7-49                                  519        5400    0.0    0.0     0.0    0.0
-         bouncedRay.unitRDir      LightRay                               app/LightRay.hs:114:7-32                                  521        5400    0.0    0.0     0.0    0.0
-         refract                  LightRay                               app/LightRay.hs:(139,1)-(142,69)                          533        5400    0.0    0.0     0.0    0.0
-          +                       Vector3                                app/Vector3.hs:16:3-56                                    538        5400    0.0    0.0     0.0    0.0
-          refract.rParallell      LightRay                               app/LightRay.hs:142:5-69                                  537        5400    0.0    0.0     0.0    0.0
-          refract.rPerpendicular  LightRay                               app/LightRay.hs:141:5-81                                  534        5400    0.0    0.0     0.0    0.0
-           +                      Vector3                                app/Vector3.hs:16:3-56                                    536        5400    0.0    0.0     0.0    0.0
-           negate                 Vector3                                app/Vector3.hs:25:3-43                                    535        5400    0.0    0.0     0.0    0.0
-         reflect                  LightRay                               app/LightRay.hs:134:1-58                                  559        1816    0.0    0.0     0.0    0.0
-          -                       Vector3                                app/Vector3.hs:17:3-56                                    560        1816    0.0    0.0     0.0    0.0
-         randVecInUnitSphere      Vector3                                app/Vector3.hs:(81,1)-(84,49)                             468         108    0.0    0.0     0.0    0.0
-          randVec                 Vector3                                app/Vector3.hs:(65,1)-(69,21)                             471         108    0.0    0.0     0.0    0.0
-           rand                   Helpers                                app/Helpers.hs:(17,1)-(21,10)                             473         108    0.0    0.0     0.0    0.0
-         rand                     Helpers                                app/Helpers.hs:(17,1)-(21,10)                             524           9    0.0    0.0     0.0    0.0
-         bouncedRay.colMix        LightRay                               app/LightRay.hs:98:7-109                                  502           0    0.1    0.0     0.1    0.0
-         bouncedRay.schlicks      LightRay                               app/LightRay.hs:(128,5)-(130,49)                          531           0    0.0    0.0     0.0    0.0
-          bouncedRay.schlicks.r0  LightRay                               app/LightRay.hs:130:9-49                                  532        5400    0.0    0.0     0.0    0.0
-        cases.rayCol              LightRay                               app/LightRay.hs:180:5-26                                  568      146771    0.0    0.0     0.0    0.0
-      runRandom                   Helpers                                app/Helpers.hs:13:1-56                                    422      320000    0.1    0.0    87.8   87.7
-       colour                     LightRay                               app/LightRay.hs:(145,1)-(148,43)                          423           0    1.8    2.2    87.7   87.7
-        cases                     LightRay                               app/LightRay.hs:(171,1)-(180,26)                          461     2105131    1.9    1.3    85.2   85.0
-         collideObjects           LightRay                               app/LightRay.hs:(71,1)-(86,86)                            462     2064346    2.8    4.3    55.0   56.4
-          collide                 LightRay                               app/LightRay.hs:(30,1)-(55,15)                            465    10321730   15.1   14.5    51.0   50.7
-           collide.a              LightRay                               app/LightRay.hs:45:5-18                                   492    10321730    6.1    6.5     6.1    6.5
-           collide.b              LightRay                               app/LightRay.hs:46:5-15                                   467    10321730    6.8    7.7     6.8    7.7
-           collide.c              LightRay                               app/LightRay.hs:47:5-26                                   493    10321730    8.3    9.3     8.3    9.3
-           collide.det            LightRay                               app/LightRay.hs:48:5-23                                   466    10321730    3.8    3.6     3.8    3.6
-           collide.t              LightRay                               app/LightRay.hs:44:5-13                                   489    10321730    1.6    1.0     2.6    2.4
-            -                     Vector3                                app/Vector3.hs:17:3-56                                    491    10321730    1.0    1.4     1.0    1.4
-           collide.detSqrt        LightRay                               app/LightRay.hs:49:5-22                                   495     4533327    0.5    0.2     0.5    0.2
-           collide.k1             LightRay                               app/LightRay.hs:50:5-33                                   494     4533327    2.6    2.3     2.6    2.3
-           collide.k2             LightRay                               app/LightRay.hs:51:5-33                                   496     4533327    2.4    2.3     2.4    2.3
-           collide.d1             LightRay                               app/LightRay.hs:52:5-23                                   497     2414926    1.0    0.6     1.0    0.6
-           collide.d2             LightRay                               app/LightRay.hs:53:5-23                                   498     2412466    1.1    0.6     1.1    0.6
-           collide.p2             LightRay                               app/LightRay.hs:55:5-15                                   513      751790    0.1    0.1     0.2    0.2
-            +                     Vector3                                app/Vector3.hs:16:3-56                                    514      751790    0.1    0.1     0.1    0.1
-           gradient               LightRay                               app/LightRay.hs:65:1-46                                   512      402790    0.7    0.5     0.7    0.6
-            -                     Vector3                                app/Vector3.hs:17:3-56                                    515      402790    0.0    0.1     0.0    0.1
-           collide.p1             LightRay                               app/LightRay.hs:54:5-15                                   565        2460    0.0    0.0     0.0    0.0
-            +                     Vector3                                app/Vector3.hs:16:3-56                                    566        2460    0.0    0.0     0.0    0.0
-          collideObjects.closest  LightRay                               app/LightRay.hs:(76,5)-(86,86)                            499     4479286    1.0    1.3     1.2    1.5
-           -                      Vector3                                app/Vector3.hs:17:3-56                                    540      704692    0.1    0.1     0.1    0.1
-           +                      Vector3                                app/Vector3.hs:16:3-56                                    516      402790    0.1    0.1     0.1    0.1
-         cases.rayCol             LightRay                               app/LightRay.hs:180:5-26                                  500     1658813    0.0    0.0     0.0    0.0
-         bouncedRay               LightRay                               app/LightRay.hs:(91,1)-(130,49)                           464      399750    4.9    4.1    28.3   27.3
-          bouncedRay.newDir       LightRay                               app/LightRay.hs:96:7-33                                   483     1622871    1.9    2.1     2.2    2.3
-           +                      Vector3                                app/Vector3.hs:16:3-56                                    488     1622871    0.3    0.2     0.3    0.2
-          bouncedRay.colMix       LightRay                               app/LightRay.hs:98:7-109                                  501     1621506    3.0    2.1     3.2    2.4
-           +                      Vector3                                app/Vector3.hs:16:3-56                                    503     1621506    0.2    0.2     0.2    0.2
-          bouncedRay.schlicks     LightRay                               app/LightRay.hs:(128,5)-(130,49)                          530      384003    0.6    0.4     1.0    0.6
-           bouncedRay.schlicks.r0 LightRay                               app/LightRay.hs:130:9-49                                  549      330003    0.3    0.2     0.3    0.2
-          -                       Vector3                                app/Vector3.hs:17:3-56                                    556      330792    0.0    0.0     0.0    0.0
-          bouncedRay.cosTheta     LightRay                               app/LightRay.hs:116:7-43                                  544      330792    0.3    0.3     0.3    0.3
-           negate                 Vector3                                app/Vector3.hs:25:3-43                                    546      330792    0.0    0.0     0.0    0.0
-          bouncedRay.isInc        LightRay                               app/LightRay.hs:110:7-28                                  542      330792    0.5    0.3     0.5    0.3
-          bouncedRay.norm         LightRay                               app/LightRay.hs:115:7-42                                  547      330792    0.0    0.0     0.0    0.0
-           negate                 Vector3                                app/Vector3.hs:25:3-43                                    567        1318    0.0    0.0     0.0    0.0
-          bouncedRay.rri          LightRay                               app/LightRay.hs:113:7-38                                  541      330792    0.1    0.0     0.1    0.0
-          bouncedRay.sinTheta     LightRay                               app/LightRay.hs:117:7-49                                  543      330792    0.2    0.1     0.2    0.1
-          bouncedRay.unitRDir     LightRay                               app/LightRay.hs:114:7-32                                  545      330792    0.6    0.4     0.6    0.4
-          refract                 LightRay                               app/LightRay.hs:(139,1)-(142,69)                          550      316620    0.2    0.0     0.9    1.2
-           +                      Vector3                                app/Vector3.hs:16:3-56                                    555      316620    0.0    0.0     0.0    0.0
-           refract.rParallell     LightRay                               app/LightRay.hs:142:5-69                                  554      316620    0.4    0.6     0.4    0.6
-           refract.rPerpendicular LightRay                               app/LightRay.hs:141:5-81                                  551      316620    0.3    0.4     0.3    0.5
-            +                     Vector3                                app/Vector3.hs:16:3-56                                    553      316620    0.0    0.0     0.0    0.0
-            negate                Vector3                                app/Vector3.hs:25:3-43                                    552      316620    0.0    0.0     0.0    0.0
-          reflect                 LightRay                               app/LightRay.hs:134:1-58                                  557       14172    0.1    0.0     0.1    0.0
-           -                      Vector3                                app/Vector3.hs:17:3-56                                    558       14172    0.0    0.0     0.0    0.0
-          bouncedRay.d            LightRay                               app/LightRay.hs:104:7-25                                  561         543    0.0    0.0     0.0    0.0
-          bouncedRay.dirOut       LightRay                               app/LightRay.hs:105:7-26                                  562         543    0.0    0.0     0.0    0.0
-           reflect                LightRay                               app/LightRay.hs:134:1-58                                  563         543    0.0    0.0     0.0    0.0
-            -                     Vector3                                app/Vector3.hs:17:3-56                                    564         543    0.0    0.0     0.0    0.0
-          rand                    Helpers                                app/Helpers.hs:(17,1)-(21,10)                             525           0    0.1    0.1     0.4    0.4
-           rand.(...)             Helpers                                app/Helpers.hs:19:7-28                                    527      420836    0.1    0.1     0.3    0.3
-            nextWord32            System.Random.SplitMix                 src/System/Random/SplitMix.hs:(129,1)-(136,28)            528      420836    0.1    0.1     0.2    0.2
-             nextWord64           System.Random.SplitMix                 src/System/Random/SplitMix.hs:(121,1)-(123,29)            529      420836    0.1    0.1     0.1    0.1
-           rand.gen'              Helpers                                app/Helpers.hs:19:7-28                                    548      415886    0.0    0.0     0.0    0.0
-           rand.r                 Helpers                                app/Helpers.hs:19:7-28                                    526      384003    0.0    0.0     0.0    0.0
-          randVecInUnitSphere     Vector3                                app/Vector3.hs:(81,1)-(84,49)                             469           0    1.5    1.1    14.0   15.1
-           randVecInUnitSphere.l  Vector3                                app/Vector3.hs:83:7-18                                    470     3100727    3.1    2.4     3.1    2.4
-           randVec                Vector3                                app/Vector3.hs:(65,1)-(69,21)                             472           0    2.5    2.4     9.4   11.7
-            rand                  Helpers                                app/Helpers.hs:(17,1)-(21,10)                             474     6201454    1.5    2.8     6.9    9.3
-             rand.(...)           Helpers                                app/Helpers.hs:19:7-28                                    476     9302181    2.3    1.7     4.8    6.5
-              nextWord32          System.Random.SplitMix                 src/System/Random/SplitMix.hs:(129,1)-(136,28)            477     9302181    1.8    3.0     2.6    4.8
-               nextWord64         System.Random.SplitMix                 src/System/Random/SplitMix.hs:(121,1)-(123,29)            478     9302181    0.7    1.7     0.7    1.7
-             rand.r               Helpers                                app/Helpers.hs:19:7-28                                    475     9302181    0.4    0.0     0.4    0.0
-             rand.gen'            Helpers                                app/Helpers.hs:19:7-28                                    482     9140206    0.1    0.0     0.1    0.0
-        colour.t                  LightRay                               app/LightRay.hs:147:7-26                                  424      320000    0.3    0.0     0.7    0.4
-         +                        Vector3                                app/Vector3.hs:16:3-56                                    504     2880000    0.3    0.4     0.3    0.4
-       mkStdGen                   System.Random.Internal                 src/System/Random/Internal.hs:583:1-45                    480           0    0.0    0.0     0.0    0.0
-        mkSMGen                   System.Random.SplitMix                 src/System/Random/SplitMix.hs:377:1-61                    481      166925    0.0    0.0     0.0    0.0
-     spawnP                       Control.Monad.Par.Scheds.Trace         Control/Monad/Par/Scheds/Trace.hs:49:1-27                 403      320000    0.0    0.0     0.2    0.1
-      spawn                       Control.Monad.Par.Scheds.Trace         Control/Monad/Par/Scheds/Trace.hs:43:1-55                 404      320000    0.0    0.0     0.1    0.1
-       put                        Control.Monad.Par.Scheds.TraceInternal Control/Monad/Par/Scheds/TraceInternal.hs:358:1-48        419           0    0.0    0.0     0.1    0.1
-        rnf                       Vector3                                app/Vector3.hs:28:3-59                                    505      320000    0.1    0.1     0.1    0.1
-    runPar                        Control.Monad.Par.Scheds.TraceInternal Control/Monad/Par/Scheds/TraceInternal.hs:295:1-47        391           0    0.0    0.0     0.9    0.9
-     sched                        Control.Monad.Par.Scheds.TraceInternal Control/Monad/Par/Scheds/TraceInternal.hs:(60,1)-(106,18) 392      320002    0.4    0.5     0.9    0.9
-      no                          Control.Monad.Par.Scheds.TraceInternal Control/Monad/Par/Scheds/TraceInternal.hs:174:7-8         572           1    0.0    0.0     0.0    0.0
-      parMap                      Control.Monad.Par.Combinator           Control/Monad/Par/Combinator.hs:41:1-47                   410           0    0.1    0.1     0.5    0.5
-       runCont                    Control.Monad.Par.Scheds.TraceInternal Control/Monad/Par/Scheds/TraceInternal.hs:182:5-11        415      640003    0.0    0.0     0.0    0.0
-       get                        Control.Monad.Par.Scheds.TraceInternal Control/Monad/Par/Scheds/TraceInternal.hs:336:1-27        417      320000    0.1    0.1     0.1    0.1
-        runCont                   Control.Monad.Par.Scheds.TraceInternal Control/Monad/Par/Scheds/TraceInternal.hs:182:5-11        570     1599999    0.0    0.0     0.0    0.0
-        put_                      Control.Monad.Par.Scheds.TraceInternal Control/Monad/Par/Scheds/TraceInternal.hs:340:1-38        571           1    0.0    0.0     0.0    0.0
-       spawnP                     Control.Monad.Par.Scheds.Trace         Control/Monad/Par/Scheds/Trace.hs:49:1-27                 411           0    0.0    0.0     0.3    0.2
-        spawn                     Control.Monad.Par.Scheds.Trace         Control/Monad/Par/Scheds/Trace.hs:43:1-55                 412           0    0.0    0.1     0.3    0.2
-         runCont                  Control.Monad.Par.Scheds.TraceInternal Control/Monad/Par/Scheds/TraceInternal.hs:182:5-11        414      320005    0.0    0.0     0.0    0.0
-         put                      Control.Monad.Par.Scheds.TraceInternal Control/Monad/Par/Scheds/TraceInternal.hs:358:1-48        569           1    0.0    0.0     0.0    0.0
-         new                      Control.Monad.Par.Scheds.TraceInternal Control/Monad/Par/Scheds/TraceInternal.hs:315:1-22        413           0    0.2    0.1     0.3    0.2
-          runCont                 Control.Monad.Par.Scheds.TraceInternal Control/Monad/Par/Scheds/TraceInternal.hs:182:5-11        416     2879992    0.0    0.0     0.0    0.0
-          put                     Control.Monad.Par.Scheds.TraceInternal Control/Monad/Par/Scheds/TraceInternal.hs:358:1-48        418      319999    0.1    0.0     0.1    0.0
-     runCont                      Control.Monad.Par.Scheds.TraceInternal Control/Monad/Par/Scheds/TraceInternal.hs:182:5-11        393           2    0.0    0.0     0.0    0.0
-     parMap                       Control.Monad.Par.Combinator           Control/Monad/Par/Combinator.hs:41:1-47                   395           0    0.0    0.0     0.0    0.0
-      runCont                     Control.Monad.Par.Scheds.TraceInternal Control/Monad/Par/Scheds/TraceInternal.hs:182:5-11        396           3    0.0    0.0     0.0    0.0
-      spawnP                      Control.Monad.Par.Scheds.Trace         Control/Monad/Par/Scheds/Trace.hs:49:1-27                 405           0    0.0    0.0     0.0    0.0
-       spawn                      Control.Monad.Par.Scheds.Trace         Control/Monad/Par/Scheds/Trace.hs:43:1-55                 406           0    0.0    0.0     0.0    0.0
-        runCont                   Control.Monad.Par.Scheds.TraceInternal Control/Monad/Par/Scheds/TraceInternal.hs:182:5-11        407           1    0.0    0.0     0.0    0.0
-  main.finCols                    Main                                   app/Main.hs:55:7-46                                       573           1    0.2    0.2     0.2    0.2
-   roundVec                       Main                                   app/Main.hs:73:1-58                                       575      320000    0.0    0.0     0.0    0.0
-   vecToCol                       Main                                   app/Main.hs:70:1-74                                       574      320000    0.0    0.1     0.0    0.1
-  ppmWrite                        Main                                   app/Main.hs:(59,1)-(62,100)                               382           1    0.0    0.0     0.2    1.0
-   ppmWrite.writeInfo             Main                                   app/Main.hs:(61,5)-(62,100)                               387      320001    0.2    1.0     0.2    1.0
-  randomIO                        System.Random                          src/System/Random.hs:571:1-30                             374           1    0.0    0.0     0.0    0.0
-   getStdRandom                   System.Random                          src/System/Random.hs:(527,1)-(528,28)                     375           1    0.0    0.0     0.0    0.0
-    nextWord64                    System.Random.SplitMix                 src/System/Random/SplitMix.hs:(121,1)-(123,29)            380           1    0.0    0.0     0.0    0.0
+MAIN                             MAIN                        <built-in>                                      185           0    0.0    0.0   100.0  100.0
+ CAF                             Shapes                      <entire-module>                                 367           0    0.0    0.0     0.0    0.0
+  randMat                        Shapes                      app/Shapes.hs:(22,1)-(31,36)                    516           0    0.0    0.0     0.0    0.0
+   rand                          Helpers                     app/Helpers.hs:(17,1)-(21,10)                   517           1    0.0    0.0     0.0    0.0
+ CAF                             Main                        <entire-module>                                 364           0    0.0    0.0     0.0    0.1
+  main                           Main                        app/Main.hs:(12,1)-(62,39)                      370           1    0.0    0.0     0.0    0.1
+   main.bounces                  Main                        app/Main.hs:59:7-24                             423           1    0.0    0.0     0.0    0.0
+   main.cam                      Main                        app/Main.hs:50:7-61                             399           1    0.0    0.0     0.0    0.0
+    createCamera                 View                        app/View.hs:(24,1)-(33,36)                      400           1    0.0    0.0     0.0    0.0
+     createCamera.llc            View                        app/View.hs:30:5-71                             437           2    0.0    0.0     0.0    0.0
+      -                          Vector3                     app/Vector3.hs:18:3-56                          446           2    0.0    0.0     0.0    0.0
+     createCamera.pxW            View                        app/View.hs:32:5-35                             448           2    0.0    0.0     0.0    0.0
+     createCamera.vy             View                        app/View.hs:29:5-59                             438           2    0.0    0.0     0.0    0.0
+      -                          Vector3                     app/Vector3.hs:18:3-56                          439           2    0.0    0.0     0.0    0.0
+     createCamera.vz             View                        app/View.hs:27:5-39                             441           2    0.0    0.0     0.0    0.0
+      -                          Vector3                     app/Vector3.hs:18:3-56                          442           2    0.0    0.0     0.0    0.0
+     createCamera.pxH            View                        app/View.hs:33:5-36                             447           1    0.0    0.0     0.0    0.0
+     createCamera.resy           View                        app/View.hs:31:5-55                             402           1    0.0    0.0     0.0    0.0
+     createCamera.vx             View                        app/View.hs:28:5-22                             445           1    0.0    0.0     0.0    0.0
+   main.height                   Main                        app/Main.hs:45:7-26                             385           1    0.0    0.0     0.0    0.0
+   main.lookat                   Main                        app/Main.hs:26:7-41                             443           1    0.0    0.0     0.0    0.0
+   main.lookfrom                 Main                        app/Main.hs:25:7-51                             444           1    0.0    0.0     0.0    0.0
+   main.rays                     Main                        app/Main.hs:56:7-82                             396           1    0.0    0.0     0.0    0.0
+    main.rays.\                  Main                        app/Main.hs:56:36-75                            419       99983    0.0    0.0     0.0    0.0
+     -                           Vector3                     app/Vector3.hs:18:3-56                          433       99927    0.0    0.0     0.0    0.0
+   main.rect                     Main                        app/Main.hs:51:7-27                             397           1    0.0    0.0     0.0    0.0
+    createRect                   View                        app/View.hs:(36,1)-(44,55)                      398           1    0.0    0.0     0.0    0.0
+     createRect.\                View                        app/View.hs:37:27-53                            404         250    0.0    0.0     0.0    0.0
+      createRect.genRow          View                        app/View.hs:44:5-55                             405      100000    0.0    0.0     0.0    0.0
+       +                         Vector3                     app/Vector3.hs:16:3-56                          435       98759    0.0    0.0     0.0    0.0
+     createRect.firstCol         View                        app/View.hs:41:5-66                             401           1    0.0    0.0     0.0    0.0
+      createRect.genRow          View                        app/View.hs:44:5-55                             403         250    0.0    0.0     0.0    0.0
+       +                         Vector3                     app/Vector3.hs:16:3-56                          436         536    0.0    0.0     0.0    0.0
+   main.resx                     Main                        app/Main.hs:47:7-23                             381           1    0.0    0.0     0.0    0.0
+   main.rpp                      Main                        app/Main.hs:58:7-20                             420           1    0.0    0.0     0.0    0.0
+   main.vy                       Main                        app/Main.hs:46:7-48                             440           1    0.0    0.0     0.0    0.0
+   main.width                    Main                        app/Main.hs:44:7-25                             384           1    0.0    0.0     0.0    0.0
+   main.noise                    Main                        app/Main.hs:(34,7)-(41,14)                      513           0    0.0    0.0     0.0    0.0
+    randMat                      Shapes                      app/Shapes.hs:(22,1)-(31,36)                    514           1    0.0    0.0     0.0    0.0
+   main.resy                     Main                        app/Main.hs:48:7-57                             383           0    0.0    0.0     0.0    0.0
+  randPos                        Main                        app/Main.hs:(85,1)-(93,5)                       500           0    0.0    0.0     0.0    0.0
+   randPos.\                     Main                        app/Main.hs:(88,18)-(91,75)                     501           0    0.0    0.0     0.0    0.0
+    rand                         Helpers                     app/Helpers.hs:(17,1)-(21,10)                   502           1    0.0    0.0     0.0    0.0
+ CAF                             Control.Parallel.Strategies <entire-module>                                 363           0    0.0    0.0     0.0    0.0
+  evalList                       Control.Parallel.Strategies Control/Parallel/Strategies.hs:542:1-26         412           1    0.0    0.0     0.0    0.0
+  parList                        Control.Parallel.Strategies Control/Parallel/Strategies.hs:552:1-24         394           1    0.0    0.0     0.0    0.0
+  runEval                        Control.Parallel.Strategies Control/Parallel/Strategies.hs:219:1-42         390           1    0.0    0.0     0.0    0.0
+ CAF                             System.Random.Internal      <entire-module>                                 360           0    0.0    0.0     0.0    0.0
+  mkStdGen                       System.Random.Internal      src/System/Random/Internal.hs:583:1-45          406           1    0.0    0.0     0.0    0.0
+  theStdGen                      System.Random.Internal      src/System/Random/Internal.hs:587:1-64          374           1    0.0    0.0     0.0    0.0
+   initSMGen                     System.Random.SplitMix      src/System/Random/SplitMix.hs:381:1-36          376           0    0.0    0.0     0.0    0.0
+    mkSMGen                      System.Random.SplitMix      src/System/Random/SplitMix.hs:377:1-61          379           1    0.0    0.0     0.0    0.0
+ CAF                             System.Random.SplitMix      <entire-module>                                 358           0    0.0    0.0     0.0    0.0
+  initSMGen                      System.Random.SplitMix      src/System/Random/SplitMix.hs:381:1-36          375           1    0.0    0.0     0.0    0.0
+ CAF                             System.Random.SplitMix.Init <entire-module>                                 356           0    0.0    0.0     0.0    0.0
+  initialSeed                    System.Random.SplitMix.Init src/System/Random/SplitMix/Init.hs:40:1-26      377           1    0.0    0.0     0.0    0.0
+ CAF                             GHC.Conc.Signal             <entire-module>                                 301           0    0.0    0.0     0.0    0.0
+ CAF                             GHC.IO.Encoding             <entire-module>                                 285           0    0.0    0.0     0.0    0.0
+ CAF                             GHC.IO.Encoding.Iconv       <entire-module>                                 283           0    0.0    0.0     0.0    0.0
+ CAF                             GHC.IO.Handle.FD            <entire-module>                                 275           0    0.0    0.0     0.0    0.0
+ CAF                             GHC.IO.Handle.Text          <entire-module>                                 273           0    0.0    0.0     0.0    0.0
+ CAF                             GHC.Event.Thread            <entire-module>                                 232           0    0.0    0.0     0.0    0.0
+ CAF                             GHC.Event.Poll              <entire-module>                                 207           0    0.0    0.0     0.0    0.0
+ main                            Main                        app/Main.hs:(12,1)-(62,39)                      371           0    0.0    0.0   100.0   99.9
+  main.noise                     Main                        app/Main.hs:(34,7)-(41,14)                      492           2    0.0    0.0     0.0    0.0
+   runRandom                     Helpers                     app/Helpers.hs:13:1-56                          493           2    0.0    0.0     0.0    0.0
+    randPos                      Main                        app/Main.hs:(85,1)-(93,5)                       494           2    0.0    0.0     0.0    0.0
+     randPos.\                   Main                        app/Main.hs:(88,18)-(91,75)                     499        1042    0.0    0.0     0.0    0.0
+      rand                       Helpers                     app/Helpers.hs:(17,1)-(21,10)                   503        1043    0.0    0.0     0.0    0.0
+       rand.r                    Helpers                     app/Helpers.hs:19:7-28                          504        2048    0.0    0.0     0.0    0.0
+       rand.(...)                Helpers                     app/Helpers.hs:19:7-28                          506        2037    0.0    0.0     0.0    0.0
+        nextWord32               System.Random.SplitMix      src/System/Random/SplitMix.hs:(129,1)-(136,28)  510        2041    0.0    0.0     0.0    0.0
+         nextWord64              System.Random.SplitMix      src/System/Random/SplitMix.hs:(121,1)-(123,29)  511        2051    0.0    0.0     0.0    0.0
+       rand.gen'                 Helpers                     app/Helpers.hs:19:7-28                          536        2028    0.0    0.0     0.0    0.0
+     randPos.l                   Main                        app/Main.hs:86:7-77                             495           2    0.0    0.0     0.0    0.0
+    mkStdGen                     System.Random.Internal      src/System/Random/Internal.hs:583:1-45          533           0    0.0    0.0     0.0    0.0
+     mkSMGen                     System.Random.SplitMix      src/System/Random/SplitMix.hs:377:1-61          534           2    0.0    0.0     0.0    0.0
+   randMat                       Shapes                      app/Shapes.hs:(22,1)-(31,36)                    515           0    0.0    0.0     0.0    0.0
+    rand                         Helpers                     app/Helpers.hs:(17,1)-(21,10)                   518         842    0.0    0.0     0.0    0.0
+     rand.(...)                  Helpers                     app/Helpers.hs:19:7-28                          520        1829    0.0    0.0     0.0    0.0
+      nextWord32                 System.Random.SplitMix      src/System/Random/SplitMix.hs:(129,1)-(136,28)  521        1830    0.0    0.0     0.0    0.0
+       nextWord64                System.Random.SplitMix      src/System/Random/SplitMix.hs:(121,1)-(123,29)  523        1841    0.0    0.0     0.0    0.0
+       nextWord64                System.Random.SplitMix      src/System/Random/SplitMix.hs:(121,1)-(123,29)  522           1    0.0    0.0     0.0    0.0
+     rand.gen'                   Helpers                     app/Helpers.hs:19:7-28                          526        1666    0.0    0.0     0.0    0.0
+     rand.r                      Helpers                     app/Helpers.hs:19:7-28                          519        1081    0.0    0.0     0.0    0.0
+    randVec                      Vector3                     app/Vector3.hs:(66,1)-(70,21)                   527         842    0.0    0.0     0.0    0.0
+     rand                        Helpers                     app/Helpers.hs:(17,1)-(21,10)                   528        2481    0.0    0.0     0.0    0.0
+      rand.gen'                  Helpers                     app/Helpers.hs:19:7-28                          529        2496    0.0    0.0     0.0    0.0
+      rand.(...)                 Helpers                     app/Helpers.hs:19:7-28                          530        2493    0.0    0.0     0.0    0.0
+       nextWord32                System.Random.SplitMix      src/System/Random/SplitMix.hs:(129,1)-(136,28)  531        2466    0.0    0.0     0.0    0.0
+        nextWord64               System.Random.SplitMix      src/System/Random/SplitMix.hs:(121,1)-(123,29)  532        2481    0.0    0.0     0.0    0.0
+      rand.r                     Helpers                     app/Helpers.hs:19:7-28                          594         525    0.0    0.0     0.0    0.0
+  main.bb1                       Main                        app/Main.hs:30:7-68                             487           1    0.0    0.0     0.0    0.0
+  main.bb2                       Main                        app/Main.hs:31:7-50                             488           1    0.0    0.0     0.0    0.0
+  main.bb3                       Main                        app/Main.hs:32:7-68                             489           1    0.0    0.0     0.0    0.0
+  main.cols                      Main                        app/Main.hs:60:7-78                             387           1    0.0    0.0   100.0   99.7
+   nextWord64                    System.Random.SplitMix      src/System/Random/SplitMix.hs:(121,1)-(123,29)  409      100000    0.0    0.0     0.0    0.0
+   coloursPar                    LightRay                    app/LightRay.hs:(176,1)-(180,39)                388           1    0.0    0.0   100.0   99.7
+    coloursPar.\                 LightRay                    app/LightRay.hs:178:17-56                       416       99983    0.0    0.0    99.9   99.6
+     runRandom                   Helpers                     app/Helpers.hs:13:1-56                          417       99984    0.0    0.0    99.9   99.6
+      colour                     LightRay                    app/LightRay.hs:(152,1)-(163,56)                418       99984    0.1    0.3    99.9   99.6
+       cases                     LightRay                    app/LightRay.hs:(183,1)-(192,26)                422      385519    0.1    0.2    99.4   98.7
+        collideObjects           LightRay                    app/LightRay.hs:(72,1)-(87,24)                  424      383661    3.8   11.6    98.6   96.9
+         collide                 LightRay                    app/LightRay.hs:(37,1)-(62,15)                  426    79519517   12.7   20.7    94.5   85.0
+          collide.t              LightRay                    app/LightRay.hs:51:5-13                         470    77327584    1.0    0.0    13.3    7.6
+           -                     Vector3                     app/Vector3.hs:18:3-56                          471    76665513   12.2    7.6    12.2    7.6
+          collide.b              LightRay                    app/LightRay.hs:53:5-15                         434    75388271   23.2   21.5    23.2   21.5
+          collide.c              LightRay                    app/LightRay.hs:54:5-26                         474    74964646   33.7   21.3    33.7   21.3
+          collide.disc           LightRay                    app/LightRay.hs:55:5-24                         428    74668149   11.0   13.1    11.0   13.1
+          collide.discSqrt       LightRay                    app/LightRay.hs:56:5-24                         477     1000251    0.0    0.0     0.0    0.0
+          collide.k1             LightRay                    app/LightRay.hs:57:5-28                         480      999618    0.2    0.2     0.2    0.2
+          collide.k2             LightRay                    app/LightRay.hs:58:5-28                         479      999533    0.1    0.2     0.1    0.2
+          collide.d1             LightRay                    app/LightRay.hs:59:5-23                         484      518878    0.1    0.1     0.1    0.1
+          collide.d2             LightRay                    app/LightRay.hs:60:5-23                         485      503538    0.1    0.1     0.1    0.1
+          collide.a              LightRay                    app/LightRay.hs:52:5-18                         472      383581    0.1    0.1     0.1    0.1
+          collide.p2             LightRay                    app/LightRay.hs:62:5-15                         545      307117    0.0    0.0     0.0    0.0
+           +                     Vector3                     app/Vector3.hs:16:3-56                          546      307100    0.0    0.0     0.0    0.0
+          -                      Vector3                     app/Vector3.hs:18:3-56                          544      210944    0.0    0.0     0.0    0.0
+          collide.p1             LightRay                    app/LightRay.hs:61:5-15                         585       15511    0.0    0.0     0.0    0.0
+           +                     Vector3                     app/Vector3.hs:16:3-56                          586       15511    0.0    0.0     0.0    0.0
+          collide.c              LightRay                    app/LightRay.hs:54:5-26                         473           2    0.0    0.0     0.0    0.0
+          collide.b              LightRay                    app/LightRay.hs:53:5-15                         430           1    0.0    0.0     0.0    0.0
+          collide.b              LightRay                    app/LightRay.hs:53:5-15                         429           1    0.0    0.0     0.0    0.0
+          collide.k1             LightRay                    app/LightRay.hs:57:5-28                         476           1    0.0    0.0     0.0    0.0
+          collide.k1             LightRay                    app/LightRay.hs:57:5-28                         475           1    0.0    0.0     0.0    0.0
+          collide.k2             LightRay                    app/LightRay.hs:58:5-28                         478           1    0.0    0.0     0.0    0.0
+         collideObjects.closest  LightRay                    app/LightRay.hs:(77,5)-(87,24)                  486      902549    0.1    0.2     0.3    0.3
+          -                      Vector3                     app/Vector3.hs:18:3-56                          543      275316    0.0    0.0     0.0    0.0
+          +                      Vector3                     app/Vector3.hs:16:3-56                          548      210880    0.0    0.0     0.0    0.0
+          smallNumber            LightRay                    app/LightRay.hs:34:1-19                         547      184932    0.1    0.1     0.1    0.1
+        cases.rayCol             LightRay                    app/LightRay.hs:192:5-26                        537      195810    0.0    0.0     0.0    0.0
+        bouncedRay               LightRay                    app/LightRay.hs:(92,1)-(130,49)                 549      184684    0.1    0.3     0.8    1.6
+         randVecInUnitSphere     Vector3                     app/Vector3.hs:(90,1)-(93,49)                   554      302007    0.1    0.1     0.4    0.9
+          randVec                Vector3                     app/Vector3.hs:(66,1)-(70,21)                   556      301995    0.1    0.2     0.2    0.7
+           rand                  Helpers                     app/Helpers.hs:(17,1)-(21,10)                   557      905366    0.0    0.2     0.2    0.5
+            rand.r               Helpers                     app/Helpers.hs:19:7-28                          558      905876    0.0    0.0     0.0    0.0
+            rand.(...)           Helpers                     app/Helpers.hs:19:7-28                          559      905779    0.1    0.1     0.1    0.4
+             nextWord32          System.Random.SplitMix      src/System/Random/SplitMix.hs:(129,1)-(136,28)  560      905412    0.0    0.2     0.0    0.3
+              nextWord64         System.Random.SplitMix      src/System/Random/SplitMix.hs:(121,1)-(123,29)  561      906059    0.0    0.1     0.0    0.1
+            rand.gen'            Helpers                     app/Helpers.hs:19:7-28                          562      852065    0.0    0.0     0.0    0.0
+          randVecInUnitSphere.l  Vector3                     app/Vector3.hs:92:7-18                          555      301856    0.1    0.1     0.1    0.1
+         bouncedRay.newDir       LightRay                    app/LightRay.hs:97:7-33                         589      105896    0.1    0.1     0.1    0.1
+          +                      Vector3                     app/Vector3.hs:16:3-56                          590      105911    0.0    0.0     0.0    0.0
+         bouncedRay.colMix       LightRay                    app/LightRay.hs:98:7-88                         591      104612    0.1    0.1     0.1    0.1
+         bouncedRay.f            LightRay                    app/LightRay.hs:106:7-17                        563       51126    0.0    0.0     0.0    0.0
+         bouncedRay.dirOut       LightRay                    app/LightRay.hs:105:7-29                        551       51104    0.0    0.0     0.0    0.1
+          reflect                LightRay                    app/LightRay.hs:134:1-58                        552       51110    0.0    0.0     0.0    0.1
+           -                     Vector3                     app/Vector3.hs:18:3-56                          553       51117    0.0    0.0     0.0    0.0
+         +                       Vector3                     app/Vector3.hs:16:3-56                          550       51101    0.0    0.0     0.0    0.0
+         *                       Vector3                     app/Vector3.hs:21:3-56                          564       50154    0.0    0.0     0.0    0.0
+         rand                    Helpers                     app/Helpers.hs:(17,1)-(21,10)                   570       26908    0.0    0.0     0.0    0.0
+          rand.(...)             Helpers                     app/Helpers.hs:19:7-28                          572       26904    0.0    0.0     0.0    0.0
+           nextWord32            System.Random.SplitMix      src/System/Random/SplitMix.hs:(129,1)-(136,28)  573       26905    0.0    0.0     0.0    0.0
+            nextWord64           System.Random.SplitMix      src/System/Random/SplitMix.hs:(121,1)-(123,29)  574       26907    0.0    0.0     0.0    0.0
+          rand.r                 Helpers                     app/Helpers.hs:19:7-28                          571       25699    0.0    0.0     0.0    0.0
+          rand.gen'              Helpers                     app/Helpers.hs:19:7-28                          588       24046    0.0    0.0     0.0    0.0
+         -                       Vector3                     app/Vector3.hs:18:3-56                          584       26834    0.0    0.0     0.0    0.0
+         bouncedRay.norm         LightRay                    app/LightRay.hs:115:7-42                        569       26834    0.0    0.0     0.0    0.0
+          negate                 Vector3                     app/Vector3.hs:26:3-43                          587       13354    0.0    0.0     0.0    0.0
+         bouncedRay.sinTheta     LightRay                    app/LightRay.hs:117:7-49                        567       26833    0.0    0.0     0.0    0.0
+         smallNumber             LightRay                    app/LightRay.hs:34:1-19                         583       26833    0.0    0.0     0.0    0.0
+         bouncedRay.cosTheta     LightRay                    app/LightRay.hs:116:7-31                        568       26831    0.0    0.0     0.0    0.0
+         bouncedRay.isInc        LightRay                    app/LightRay.hs:111:7-28                        566       26828    0.0    0.0     0.0    0.0
+         bouncedRay.rri          LightRay                    app/LightRay.hs:114:7-38                        565       26826    0.0    0.0     0.0    0.0
+         bouncedRay.schlicks     LightRay                    app/LightRay.hs:(128,5)-(130,49)                575       25702    0.0    0.0     0.0    0.0
+          bouncedRay.schlicks.r0 LightRay                    app/LightRay.hs:130:9-49                        576       25700    0.0    0.0     0.0    0.0
+         refract                 LightRay                    app/LightRay.hs:(139,1)-(142,69)                577       23894    0.0    0.0     0.0    0.0
+          +                      Vector3                     app/Vector3.hs:16:3-56                          582       23893    0.0    0.0     0.0    0.0
+          refract.rParallell     LightRay                    app/LightRay.hs:142:5-69                        581       23891    0.0    0.0     0.0    0.0
+          refract.rPerpendicular LightRay                    app/LightRay.hs:141:5-81                        578       23890    0.0    0.0     0.0    0.0
+           +                     Vector3                     app/Vector3.hs:16:3-56                          579       23892    0.0    0.0     0.0    0.0
+           negate                Vector3                     app/Vector3.hs:26:3-43                          580       23888    0.0    0.0     0.0    0.0
+         reflect                 LightRay                    app/LightRay.hs:134:1-58                        592        2941    0.0    0.0     0.0    0.0
+          -                      Vector3                     app/Vector3.hs:18:3-56                          593        2941    0.0    0.0     0.0    0.0
+       colour.t                  LightRay                    app/LightRay.hs:160:7-26                        421       99983    0.0    0.0     0.0    0.0
+        +                        Vector3                     app/Vector3.hs:16:3-56                          538       99977    0.0    0.0     0.0    0.0
+       colour.vSqrt              LightRay                    app/LightRay.hs:163:5-56                        539       99965    0.0    0.0     0.0    0.0
+       changeV                   LightRay                    app/LightRay.hs:(145,1)-(149,29)                431       99938    0.1    0.2     0.4    0.6
+        changeV.p                LightRay                    app/LightRay.hs:148:7-89                        449      199933    0.1    0.1     0.1    0.1
+         +                       Vector3                     app/Vector3.hs:16:3-56                          469      199861    0.0    0.0     0.0    0.0
+         +                       Vector3                     app/Vector3.hs:16:3-56                          468           1    0.0    0.0     0.0    0.0
+         +                       Vector3                     app/Vector3.hs:16:3-56                          467           1    0.0    0.0     0.0    0.0
+        rand                     Helpers                     app/Helpers.hs:(17,1)-(21,10)                   456      199905    0.0    0.1     0.1    0.2
+         rand.r                  Helpers                     app/Helpers.hs:19:7-28                          457      399749    0.0    0.0     0.0    0.0
+         rand.(...)              Helpers                     app/Helpers.hs:19:7-28                          458      399713    0.0    0.0     0.1    0.2
+          nextWord32             System.Random.SplitMix      src/System/Random/SplitMix.hs:(129,1)-(136,28)  464      399629    0.0    0.1     0.0    0.1
+           nextWord64            System.Random.SplitMix      src/System/Random/SplitMix.hs:(121,1)-(123,29)  465      399769    0.0    0.0     0.0    0.0
+          nextWord32             System.Random.SplitMix      src/System/Random/SplitMix.hs:(129,1)-(136,28)  459           2    0.0    0.0     0.0    0.0
+           nextWord64            System.Random.SplitMix      src/System/Random/SplitMix.hs:(121,1)-(123,29)  460           2    0.0    0.0     0.0    0.0
+         rand.gen'               Helpers                     app/Helpers.hs:19:7-28                          466      356607    0.0    0.0     0.0    0.0
+        +                        Vector3                     app/Vector3.hs:16:3-56                          432      199841    0.0    0.0     0.0    0.0
+      mkStdGen                   System.Random.Internal      src/System/Random/Internal.hs:583:1-45          461           0    0.0    0.0     0.0    0.0
+       mkSMGen                   System.Random.SplitMix      src/System/Random/SplitMix.hs:377:1-61          462       99945    0.0    0.0     0.0    0.0
+     colour                      LightRay                    app/LightRay.hs:(152,1)-(163,56)                452           0    0.0    0.0     0.0    0.0
+      changeV                    LightRay                    app/LightRay.hs:(145,1)-(149,29)                454           0    0.0    0.0     0.0    0.0
+       rand                      Helpers                     app/Helpers.hs:(17,1)-(21,10)                   455           1    0.0    0.0     0.0    0.0
+       changeV.p                 LightRay                    app/LightRay.hs:148:7-89                        463           0    0.0    0.0     0.0    0.0
+     colour                      LightRay                    app/LightRay.hs:(152,1)-(163,56)                450           0    0.0    0.0     0.0    0.0
+      changeV                    LightRay                    app/LightRay.hs:(145,1)-(149,29)                451           0    0.0    0.0     0.0    0.0
+       rand                      Helpers                     app/Helpers.hs:(17,1)-(21,10)                   453           1    0.0    0.0     0.0    0.0
+    using                        Control.Parallel.Strategies Control/Parallel/Strategies.hs:338:1-35         389           1    0.0    0.0     0.0    0.0
+     parListChunk                Control.Parallel.Strategies Control/Parallel/Strategies.hs:(600,1)-(602,67) 392           1    0.0    0.0     0.0    0.0
+     runEval                     Control.Parallel.Strategies Control/Parallel/Strategies.hs:219:1-42         391           0    0.0    0.0     0.0    0.0
+      parListChunk               Control.Parallel.Strategies Control/Parallel/Strategies.hs:(600,1)-(602,67) 393           0    0.0    0.0     0.0    0.0
+       parList                   Control.Parallel.Strategies Control/Parallel/Strategies.hs:552:1-24         395           0    0.0    0.0     0.0    0.0
+        rparWith                 Control.Parallel.Strategies Control/Parallel/Strategies.hs:494:1-32         410           1    0.0    0.0     0.0    0.0
+         parEval                 Control.Parallel.Strategies Control/Parallel/Strategies.hs:(513,1)-(518,28) 411         391    0.0    0.0     0.0    0.0
+          evalList               Control.Parallel.Strategies Control/Parallel/Strategies.hs:542:1-26         414           0    0.0    0.0     0.0    0.0
+           rseq                  Control.Parallel.Strategies Control/Parallel/Strategies.hs:429:1-26         415       99983    0.0    0.0     0.0    0.0
+         evalList                Control.Parallel.Strategies Control/Parallel/Strategies.hs:542:1-26         413           0    0.0    0.0     0.0    0.0
+   mkStdGen                      System.Random.Internal      src/System/Random/Internal.hs:583:1-45          407           0    0.0    0.0     0.0    0.0
+    mkSMGen                      System.Random.SplitMix      src/System/Random/SplitMix.hs:377:1-61          408           1    0.0    0.0     0.0    0.0
+  main.finCols                   Main                        app/Main.hs:61:7-46                             540           1    0.0    0.0     0.0    0.0
+   roundVec                      Main                        app/Main.hs:79:1-58                             542      100000    0.0    0.0     0.0    0.0
+   vecToCol                      Main                        app/Main.hs:76:1-74                             541      100000    0.0    0.0     0.0    0.0
+  main.ground                    Main                        app/Main.hs:29:7-79                             427           1    0.0    0.0     0.0    0.0
+  main.noise                     Main                        app/Main.hs:(34,7)-(41,14)                      490           1    0.0    0.0     0.0    0.0
+   runRandom                     Helpers                     app/Helpers.hs:13:1-56                          491           1    0.0    0.0     0.0    0.0
+    randPos                      Main                        app/Main.hs:(85,1)-(93,5)                       496           1    0.0    0.0     0.0    0.0
+     randPos.\                   Main                        app/Main.hs:(88,18)-(91,75)                     498         220    0.0    0.0     0.0    0.0
+      rand                       Helpers                     app/Helpers.hs:(17,1)-(21,10)                   505         220    0.0    0.0     0.0    0.0
+       rand.(...)                Helpers                     app/Helpers.hs:19:7-28                          508         440    0.0    0.0     0.0    0.0
+        nextWord32               System.Random.SplitMix      src/System/Random/SplitMix.hs:(129,1)-(136,28)  509         440    0.0    0.0     0.0    0.0
+         nextWord64              System.Random.SplitMix      src/System/Random/SplitMix.hs:(121,1)-(123,29)  512         440    0.0    0.0     0.0    0.0
+       rand.r                    Helpers                     app/Helpers.hs:19:7-28                          507         440    0.0    0.0     0.0    0.0
+       rand.gen'                 Helpers                     app/Helpers.hs:19:7-28                          535         439    0.0    0.0     0.0    0.0
+     randPos.l                   Main                        app/Main.hs:86:7-77                             497           1    0.0    0.0     0.0    0.0
+    mkStdGen                     System.Random.Internal      src/System/Random/Internal.hs:583:1-45          524           0    0.0    0.0     0.0    0.0
+     mkSMGen                     System.Random.SplitMix      src/System/Random/SplitMix.hs:377:1-61          525           1    0.0    0.0     0.0    0.0
+  main.resy                      Main                        app/Main.hs:48:7-57                             382           1    0.0    0.0     0.0    0.0
+  main.spheres                   Main                        app/Main.hs:42:7-54                             425           1    0.0    0.0     0.0    0.0
+  main.star                      Main                        app/Main.hs:28:7-79                             483           1    0.0    0.0     0.0    0.0
+  main.star                      Main                        app/Main.hs:28:7-79                             482           1    0.0    0.0     0.0    0.0
+  main.star                      Main                        app/Main.hs:28:7-79                             481           1    0.0    0.0     0.0    0.0
+  ppmWrite                       Main                        app/Main.hs:(65,1)-(68,100)                     380           1    0.0    0.0     0.0    0.2
+   ppmWrite.writeInfo            Main                        app/Main.hs:(67,5)-(68,100)                     386      100001    0.0    0.2     0.0    0.2
+  randomIO                       System.Random               src/System/Random.hs:571:1-30                   372           1    0.0    0.0     0.0    0.0
+   getStdRandom                  System.Random               src/System/Random.hs:(527,1)-(528,28)           373           1    0.0    0.0     0.0    0.0
+    nextWord64                   System.Random.SplitMix      src/System/Random/SplitMix.hs:(121,1)-(123,29)  378           1    0.0    0.0     0.0    0.0
