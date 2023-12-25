@@ -1,5 +1,6 @@
 {-# HLINT ignore "Use map" #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 
 module LightRay
   ( coloursPar,
@@ -13,7 +14,6 @@ import Data.List (foldl1')
 import Data.Maybe (isJust)
 import Helpers
 import Shapes
-import System.Random (Random)
 import Vector3
 import View
 
@@ -25,15 +25,15 @@ Rewrite collideObjects using folds.
 Rewrite rand. Is about 10% of time spent
 -}
 
-data Ray a = Ray {dir :: Vec3 a, origin :: Vec3 a, col :: Vec3 a}
+data Ray = Ray {dir :: Vec3 , origin :: Vec3 , col :: Vec3 }
   deriving (Show, Eq)
 
-type CollideInfo a = (Vec3 a, Vec3 a)
+type CollideInfo = (Vec3 , Vec3)
 
-smallNumber :: Floating a => a
+smallNumber :: Double
 smallNumber = 0.001
 
-collide :: (Ord a, Floating a) => Object a -> Ray a -> Maybe (CollideInfo a)
+collide :: Object -> Ray -> Maybe CollideInfo
 collide s@(Sphere r m _) (Ray v o _)
   -- the checks for K being positive checks if the lightrays actually travel in the
   -- vectors direction, if its negative they travel backwards
@@ -61,14 +61,14 @@ collide s@(Sphere r m _) (Ray v o _)
     p1 = d1 + o
     p2 = d2 + o
 
-gradient :: Floating a => Object a -> Vec3 a -> Vec3 a
+gradient :: Object -> Vec3 -> Vec3
 gradient (Sphere _ c _) p = unitVector $ p - c
 {-# INLINE gradient #-}
 
 -- Given a list of objects and a ray, checks which object is the closest to the rays origin.
 -- TODO: Make the scalarMul 0.001 be somewhere else, it gets weird for glass
 -- TODO: rewrite closest using folds
-collideObjects :: (Ord a, Floating a) => [Object a] -> Ray a -> Maybe (Object a, CollideInfo a)
+collideObjects :: [Object] -> Ray -> Maybe (Object, CollideInfo)
 collideObjects o r@(Ray _ origin _) =
   closest $
     (filter (isJust . snd) . zip o) $
@@ -88,7 +88,7 @@ collideObjects o r@(Ray _ origin _) =
 
 -- Given an object, the point of intersection with that object and the ray that intersected the object,
 -- create a new ray with an origin at the bounce and appropriate new direction
-bouncedRay :: (Random a, Floating a, Ord a) => Object a -> CollideInfo a -> Ray a -> R (Ray a)
+bouncedRay :: Object -> CollideInfo -> Ray -> R Ray
 bouncedRay (Sphere _ _ (Lambertian (Vec3 matR matG matB))) (p, g) (Ray _ _ (Vec3 rayR rayG rayB)) = do
   t <- randUnitVec
   -- Make sure that the new dir is not turning > 90 deg in any direction
@@ -130,19 +130,19 @@ bouncedRay (Sphere _ _ (Refractive i)) (p, g) (Ray rDir _ col) = do
         r0 = ((1 - rri) / (1 + rri)) ^ (2 :: Int)
 
 -- NOTE: Observe that reflect and refract functions both expect all vectors to be unitvectors.
-reflect :: Num a => Vec3 a -> Vec3 a -> Vec3 a
+reflect :: Vec3 -> Vec3 -> Vec3
 reflect rIn norm = rIn - scalarMul (2 * dot rIn norm) norm
 
 -- Observe that norm is the normal vector such that the dot product of it and rin is positive.
 -- Refracts gives the refracted ray given an incoming ray, a normal and ref indices
-refract :: Floating p => Vec3 p -> Vec3 p -> p -> Vec3 p
+refract :: Vec3 -> Vec3 -> Double -> Vec3
 refract rIn norm rri = rPerpendicular + rParallell
   where
     rPerpendicular = scalarMul rri (rIn + scalarMul (dot (negate rIn) norm) norm)
     rParallell = scalarMul (-sqrt (1 - sqVecLen rPerpendicular)) norm
 
 -- Changes ray to account for defocus blur (aperture size) and antialiasing
-changeR :: (Random a, Ord a, Floating a) => Camera a -> Ray a -> R (Ray a)
+changeR :: Camera -> Ray -> R Ray
 changeR (CameraInternal {apertureRadius = aR, pixelHeight = pxH, pixelWidth = pxW, vy = vecy, vx = vecx}) (Ray rDir origin col) = do
   xWeight <- rand
   yWeight <- rand
@@ -152,7 +152,7 @@ changeR (CameraInternal {apertureRadius = aR, pixelHeight = pxH, pixelWidth = px
       pzd = scalarMul (ay * aR) vecy
   return (Ray (unitVector $ rDir + dd) (origin + pxd + pzd) col)
 
-colour :: (Random a, Ord a, Floating a) => Camera a -> [Object a] -> Int -> Int -> Ray a -> R (Vec3 a)
+colour :: Camera -> [Object] -> Int -> Int -> Ray -> R Vec3
 colour cam o bounces rpp r = do
   eles <-
     replicateM
@@ -169,26 +169,25 @@ colour cam o bounces rpp r = do
 -- TODO: Would be prettier to have this be in the random monad, and save the runrandom for later.
 -- Would probably be more efficient too
 coloursPar ::
-  (Random a, Ord a, Floating a, P.NFData a) =>
-  Camera a ->
-  [Object a] ->
+  Camera ->
+  [Object] ->
   Int ->
   Int ->
   [Int] ->
-  [Ray a] ->
-  [Vec3 a]
+  [Ray] ->
+  [Vec3]
 coloursPar cam o bounces rpp seeds rs =
   fmap
     (\(x, y) -> runRandom (colour cam o bounces rpp x) y)
     (zip rs seeds)
     `P.using` P.parListChunk 256 P.rseq
 
-cases :: (Random a, Ord a, Floating a, Integral b) => [Object a] -> b -> Ray a -> b -> R (Vec3 a)
+cases :: [Object] -> Int -> Ray -> Int -> R Vec3
 cases o count currR maxBounce
   | count > maxBounce = return (Vec3 0 0 0)
   | otherwise = case collideObjects o currR of
       Nothing -> return (Vec3 0 0 0)
-      Just (Sphere _ _ (Lightsource _), _) -> return (rayCol currR)
+      Just (Sphere _ _ (Lightsource lc), _) -> return (lc *rayCol currR)
       Just (obj, p) -> do
         tmpR <- bouncedRay obj p currR
         cases o (count + 1) tmpR maxBounce

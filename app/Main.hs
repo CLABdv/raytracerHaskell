@@ -13,19 +13,20 @@ main = do
   {-
   TODO:
   Make the FOV be in radians/degrees instead of a given thingy
-  Wrap camera stuff in a camera module
   Create a error when the plane up is the exact same direction as the vector from lookfrom to lookat.
-  Maybe implement enum for vectors to be able to do a [1,a..] instead of calling genRow
-  make it so that the up vector is at a square angle to the lookat vector
 
-  For light, make it so that bounced rays have a bias to go towards lightsources, which depends on the sources strengths.
-  (or something)
+  For light, make it so that lightsources dont look all fucky
+  Maybe rework how the lightsources work all togheter
+
+  Implement bounding boxes
   -}
   seed <- randomIO :: IO Int
-  let lookfrom = Vec3 (-10) 3.2 (-18) :: Vec3 Float -- lookfrom, lookat, width, height and vup are magic numbers. so is resx
-      lookat = Vec3 0 2.5 0 :: Vec3 Float
+  print seed
+  let lookfrom = Vec3 (-10) 3.2 (-18)
+      lookat = Vec3 0 2.5 0
 
-      star = Sphere 1000000000 (Vec3 0 1000001000 0) (Lightsource (Vec3 1 1 1))
+      star = Sphere 10 (Vec3 0 20 0) (Lightsource (Vec3 2 2 2))
+      star2 = Sphere 10 (Vec3 10 20 18) (Lightsource (Vec3 2 2 2))
       ground = Sphere 10000 (Vec3 0 (-10000) 0) (Lambertian (Vec3 0.5 0.5 0.5))
       bb1 = Sphere 4 (Vec3 (-8) 4 8) (Lambertian (Vec3 0.8 0.3 0.9))
       bb2 = Sphere 4 (Vec3 0 4 0) (Refractive 1.5)
@@ -39,13 +40,13 @@ main = do
               return $ zipWith (Sphere 1) pos mat
           )
           seed
-      spheres = [ground, star, bb1, bb2, bb3] ++ noise
+      spheres = [ground, star, star2, bb1, bb2, bb3] ++ noise
 
-      width = 40 :: Float
-      height = 25 :: Float
-      vy = unitVector $ Vec3 0 1 0 :: Vec3 Float -- insert your desired y axis
+      width = 40 
+      height = 25 
+      vy = unitVector $ Vec3 0 1 0 
       resx = 400 :: Int -- FOV width in actual pixels
-      resy = round ((fromIntegral resx / width) * height)
+      resy = round (fromIntegral resx / width * height)
 
       cam = createCamera lookfrom lookat vy height width resx 0.1
       rect = createRect cam
@@ -55,33 +56,31 @@ main = do
       -- There probably is a better way to do this, but this'll work for now.
       rays = concatMap (map (\x -> Ray (x - lookfrom) lookfrom (Vec3 1 1 1))) rect
 
-      rpp = 10 :: Int
+      rpp = 100 :: Int
       bounces = 8 :: Int
       cols = coloursPar cam spheres bounces rpp (randoms (mkStdGen seed)) rays
-      finCols = map (roundVec . vecToCol) cols
+      finCols = map (truncVec . vecToCol) cols
   putStrLn $ ppmWrite resx resy finCols
 
-ppmWrite :: Int -> Int -> [Vec3 Int] -> String
+ppmWrite :: Int -> Int -> [(Int, Int, Int)] -> String
 ppmWrite w h i = "P3" ++ " " ++ show w ++ " " ++ show h ++ "\n" ++ "255\n" ++ writeInfo i
   where
     writeInfo [] = []
-    writeInfo ((Vec3 r g b) : cs) = show r ++ " " ++ show g ++ " " ++ show b ++ "\n" ++ writeInfo cs
+    writeInfo ((r, g, b) : cs) = show r ++ " " ++ show g ++ " " ++ show b ++ "\n" ++ writeInfo cs
 
--- generates an infinite list of 3d vectors.
--- basically [base,base+step..] if i had implemented Enum
-genRow :: Num a => Vec3 a -> Vec3 a -> [Vec3 a]
+genRow :: Vec3 -> Vec3 -> [Vec3]
 genRow base step = base : genRow (base + step) step
 
-vecToCol :: (Num a, Ord a) => Vec3 a -> Vec3 a
-vecToCol (Vec3 a b c) = scalarMul 255 (Vec3 (max a 0) (max b 0) (max c 0))
+vecToCol :: Vec3 -> Vec3
+vecToCol (Vec3 a b c) = scalarMul 255 (Vec3 (min (max a 0) 1) (min (max b 0) 1) (min (max c 0) 1))
 
-roundVec :: (RealFrac a) => Vec3 a -> Vec3 Int
-roundVec (Vec3 a b c) = Vec3 (round a) (round b) (round c)
+truncVec :: Vec3 -> (Int, Int, Int)
+truncVec (Vec3 a b c) = (truncate a, truncate b, truncate c)
 
 -- gets x,z coords of lowest corner
 -- returns inf list, make sure to take a part of the spine of it
 -- otherwise eval wont finish til' after the heat death of the universe.
-randPos :: (Enum a, Random a, Floating a) => (a, a) -> Int -> R [Vec3 a]
+randPos :: (Double, Double) -> Int -> R [Vec3]
 randPos (lx, lz) c = do
   let l = [(x, z) | x <- take c [lx, lx + 6 ..], z <- take c [lz, lz + 6 ..]]
   mapM

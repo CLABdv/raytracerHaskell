@@ -4,25 +4,25 @@ import Vector3
 
 -- TODO: depth of field blur (aperture stuff, simulate camera focal point)
 -- Use createCamera to construct. CameraInternal is only for internal usage.
-data Camera a = CameraInternal
-  { vy :: Vec3 a,
-    vx :: Vec3 a,
-    vz :: Vec3 a,
-    llc :: Vec3 a,
-    width :: a,
-    height :: a,
+data Camera = CameraInternal
+  { vy :: Vec3 ,
+    vx :: Vec3 ,
+    vz :: Vec3 ,
+    llc :: Vec3 ,
+    width :: Double,
+    height :: Double,
     resx :: Int,
     resy :: Int,
-    pixelWidth :: a,
-    pixelHeight :: a,
-    apertureRadius :: a
+    pixelWidth :: Double,
+    pixelHeight :: Double,
+    apertureRadius :: Double
   }
   deriving (Show)
 
 -- Note that vfov is the angle determining the width.
 -- Height is always a ratio to the width.
 -- the horror of this signature
-createCamera :: (RealFrac a, Floating a) => Vec3 a -> Vec3 a -> Vec3 a -> a -> a -> Int -> a -> Camera a
+createCamera :: Vec3 -> Vec3 -> Vec3 -> Double -> Double -> Int -> Double -> Camera
 createCamera lookFrom lookAt vup height width resx = CameraInternal vy vx vz llc width height resx resy pxW pxH
   where
     vz = unitVector $ lookAt - lookFrom
@@ -33,7 +33,7 @@ createCamera lookFrom lookAt vup height width resx = CameraInternal vy vx vz llc
     pxW = width / fromIntegral resx
     pxH = height / fromIntegral resy
 
-createRect :: RealFrac a => Camera a -> [[Vec3 a]]
+createRect :: Camera -> [[Vec3]]
 createRect (CameraInternal vy vx _ llc _ _ resx resy pxW pxH _) =
   map (take resx . (\x -> genRow x $ scalarMul pxW vx)) firstCol
   where
