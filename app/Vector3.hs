@@ -34,27 +34,38 @@ instance NFData Vec3 where
   rnf (Vec3 i j k) = i `deepseq` j `deepseq` k `deepseq` ()
 
 -- cross multiplication of two vectors
+cross :: Vec3 -> Vec3 -> Vec3
 cross (Vec3 a b c) (Vec3 i j k) = Vec3 (b * k - c * j) (i * c - a * k) (a * j - b * i)
 {-# INLINE cross #-}
 
 -- dot multiplication of two vectors
+dot :: Vec3 -> Vec3 -> Double
 dot (Vec3 a b c) (Vec3 i j k) = a * i + b * j + c * k
 {-# INLINE dot #-}
 
+elemInverse :: Vec3 -> Vec3
+elemInverse (Vec3 a b c) = Vec3 (1 / a) (1 / b) (1 / c)
+{-# INLINE elemInverse #-}
+
+scalarMul :: Double -> Vec3 -> Vec3
 scalarMul s (Vec3 a b c) = Vec3 (a * s) (b * s) (c * s)
 {-# INLINE scalarMul #-}
 
+scalarDiv :: Double -> Vec3 -> Vec3
 scalarDiv s (Vec3 a b c) = Vec3 (a / s) (b / s) (c / s)
 {-# INLINE scalarDiv #-}
 
 -- gives the squared vector length. This is useful cuz taking the square root is slow and is not always needed
+sqVecLen :: Vec3 -> Double
 sqVecLen (Vec3 a b c) = a * a + b * b + c * c
 {-# INLINE sqVecLen #-}
 
+vecLen :: Vec3 -> Double
 vecLen = sqrt . sqVecLen
 {-# INLINE vecLen #-}
 
 -- Produce a unit vector given a vector
+unitVector :: Vec3 -> Vec3
 unitVector r@(Vec3 a b c) = Vec3 (a / l) (b / l) (c / l)
   where
     l = vecLen r
@@ -64,7 +75,7 @@ randVec = do
   x <- rand
   y <- rand
   z <- rand
-  return $ Vec3 (x) (y) (z)
+  return $ Vec3 x y z
 
 randInUnitDisc :: (Floating a, Ord a, Random a) => R (a, a)
 randInUnitDisc = do

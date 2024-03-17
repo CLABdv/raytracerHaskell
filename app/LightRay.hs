@@ -1,6 +1,6 @@
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 {-# HLINT ignore "Use map" #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 
 module LightRay
   ( coloursPar,
@@ -10,31 +10,28 @@ where
 
 import Control.Monad.State.Lazy (replicateM)
 import qualified Control.Parallel.Strategies as P
-import Data.List (foldl1')
-import Data.Maybe (isJust)
+import Data.List (foldl1', minimumBy)
 import Helpers
 import Shapes
 import Vector3
 import View
+import BoundingBoxes hiding (singleton)
 
-{-
-TODO: TODO: TODO: TODO: TODO:
-See if collide is improvable. About 95% of the time is spent in the collide
-function, it would be terrific if i could optimize it.
-Rewrite collideObjects using folds.
-Rewrite rand. Is about 10% of time spent
--}
-
-data Ray = Ray {dir :: Vec3 , origin :: Vec3 , col :: Vec3 }
+data Ray = Ray {dir :: Vec3, origin :: Vec3, col :: Vec3}
   deriving (Show, Eq)
 
-type CollideInfo = (Vec3 , Vec3)
+type CollideInfo = (Vec3, Vec3)
 
-smallNumber :: Double
-smallNumber = 0.001
+delta :: Double
+delta = 0.001
+
+collideBox :: BoundingBox -> Ray -> Maybe CollideInfo
+collideBox (BoundingBox c lc hc) (Ray d o _) = undefined
+    where (Vec3 tx0 ty0 tz0) = (lc - o) * elemInverse d -- (*) is elementwise multiplication (Hadamard product)
+          (Vec3 tx1 ty1 tz1) = (hc - o) * elemInverse d -- (*) is elementwise multiplication (Hadamard product)
 
 collide :: Object -> Ray -> Maybe CollideInfo
-collide s@(Sphere r m _) (Ray v o _)
+collide s@(Sphere r m _) (Ray d o _)
   -- the checks for K being positive checks if the lightrays actually travel in the
   -- vectors direction, if its negative they travel backwards
   -- TODO: Move gradients somewhere else.
@@ -49,15 +46,15 @@ collide s@(Sphere r m _) (Ray v o _)
   where
     -- Magic numbers. Solving the abc formula. NOTE: Not really abc formula, simplified it a bit
     t = o - m
-    a = sqVecLen v
-    b = dot v t -- really b/2
+    a = sqVecLen d
+    b = dot d t -- really b/2
     c = sqVecLen t - r * r
     disc = b * b - a * c
     discSqrt = sqrt disc
     k1 = (-b + discSqrt) / a
     k2 = (-b - discSqrt) / a
-    d1 = scalarMul k1 v
-    d2 = scalarMul k2 v
+    d1 = scalarMul k1 d
+    d2 = scalarMul k2 d
     p1 = d1 + o
     p2 = d2 + o
 
@@ -66,36 +63,28 @@ gradient (Sphere _ c _) p = unitVector $ p - c
 {-# INLINE gradient #-}
 
 -- Given a list of objects and a ray, checks which object is the closest to the rays origin.
--- TODO: Make the scalarMul 0.001 be somewhere else, it gets weird for glass
--- TODO: rewrite closest using folds
 collideObjects :: [Object] -> Ray -> Maybe (Object, CollideInfo)
 collideObjects o r@(Ray _ origin _) =
-  closest $
-    (filter (isJust . snd) . zip o) $
-      map (`collide` r) o
+  closest (zip o $ map (`collide` r) o) >>= (\(x, (p, sN)) -> Just (x, (p + scalarMul delta sN, sN)))
   where
-    closest ((_, Nothing) : ovs) = closest ovs
-    closest ((object, Just (point, surfaceNormal)) : ovs) = case closest ovs of
-      -- the addition of smallNumber * g is because floating numbers will otherwise
-      -- it sometimes round wrong which will make the rays hit their own objects
-      Just (prevObj, (prevP, prevSN)) ->
-        -- NOTE: store the sqLength of (a-origin)? Should result in speedup
-        if sqVecLen (prevP - origin) < sqVecLen (point - origin)
-          then Just (prevObj, (prevP, prevSN)) -- if we already got smth then stuffs already added
-          else Just (object, (point + scalarMul smallNumber surfaceNormal, surfaceNormal))
-      Nothing -> Just (object, (point + scalarMul smallNumber surfaceNormal, surfaceNormal))
     closest [] = Nothing
+    closest xs = case minimumBy (\a b -> comparePoints (snd a) (snd b)) xs of
+      (_, Nothing) -> Nothing
+      (x, Just (p, sN)) -> Just (x, (p, sN))
+    comparePoints Nothing _ = GT
+    comparePoints _ Nothing = LT
+    comparePoints (Just (p, _)) (Just (p', _)) = compare (sqVecLen (p - origin)) (sqVecLen (p' - origin))
 
 -- Given an object, the point of intersection with that object and the ray that intersected the object,
 -- create a new ray with an origin at the bounce and appropriate new direction
 bouncedRay :: Object -> CollideInfo -> Ray -> R Ray
-bouncedRay (Sphere _ _ (Lambertian (Vec3 matR matG matB))) (p, g) (Ray _ _ (Vec3 rayR rayG rayB)) = do
+bouncedRay (Sphere _ _ (Lambertian matC)) (p, g) (Ray _ _ rayC) = do
   t <- randUnitVec
   -- Make sure that the new dir is not turning > 90 deg in any direction
   -- I thought this would be roughly equivalent to "if dot t g > 0 then t else negate t" but appearantly not
   -- its faster too
   let newDir = unitVector $ g + t
-      colMix = scalarMul (dot g newDir) (Vec3 (matR * rayR) (matG * rayG) (matB * rayB))
+      colMix = scalarMul (dot g newDir) (matC * rayC)
   return (Ray newDir p colMix)
 -- All colours are in the interval [0,1].
 -- This means that if the material colour is 1 all of the rays colour is kept, if it's less than one some of it is lost.
@@ -121,7 +110,7 @@ bouncedRay (Sphere _ _ (Refractive i)) (p, g) (Ray rDir _ col) = do
             then reflect rDir norm
             else refract rDir norm rri
         )
-        (p - scalarMul (4 * smallNumber) norm)
+        (p - scalarMul (4 * delta) norm)
         col
     )
   where
@@ -166,8 +155,8 @@ colour cam o bounces rpp r = do
   where
     vSqrt (Vec3 a b c) = Vec3 (sqrt a) (sqrt b) (sqrt c)
 
--- TODO: Would be prettier to have this be in the random monad, and save the runrandom for later.
--- Would probably be more efficient too
+-- this can't be in the random monad cause parallel needs to be deterministic,
+-- and random isn't deterministic until you pass it a seed
 coloursPar ::
   Camera ->
   [Object] ->
@@ -180,14 +169,14 @@ coloursPar cam o bounces rpp seeds rs =
   fmap
     (\(x, y) -> runRandom (colour cam o bounces rpp x) y)
     (zip rs seeds)
-    `P.using` P.parListChunk 256 P.rseq
+    `P.using` P.parListChunk 512 P.rseq
 
 cases :: [Object] -> Int -> Ray -> Int -> R Vec3
 cases o count currR maxBounce
   | count > maxBounce = return (Vec3 0 0 0)
   | otherwise = case collideObjects o currR of
       Nothing -> return (Vec3 0 0 0)
-      Just (Sphere _ _ (Lightsource lc), _) -> return (lc *rayCol currR)
+      Just (Sphere _ _ (Lightsource lc), _) -> return (lc * rayCol currR)
       Just (obj, p) -> do
         tmpR <- bouncedRay obj p currR
         cases o (count + 1) tmpR maxBounce

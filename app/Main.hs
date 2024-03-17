@@ -21,7 +21,7 @@ main = do
   Implement bounding boxes
   -}
   seed <- randomIO :: IO Int
-  print seed
+  --print seed
   let lookfrom = Vec3 (-10) 3.2 (-18)
       lookat = Vec3 0 2.5 0
 
@@ -56,7 +56,7 @@ main = do
       -- There probably is a better way to do this, but this'll work for now.
       rays = concatMap (map (\x -> Ray (x - lookfrom) lookfrom (Vec3 1 1 1))) rect
 
-      rpp = 100 :: Int
+      rpp = 3 :: Int
       bounces = 8 :: Int
       cols = coloursPar cam spheres bounces rpp (randoms (mkStdGen seed)) rays
       finCols = map (truncVec . vecToCol) cols

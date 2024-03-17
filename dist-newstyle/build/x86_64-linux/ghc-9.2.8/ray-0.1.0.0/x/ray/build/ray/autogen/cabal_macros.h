@@ -60,9 +60,9 @@
   (major1) == 3 && (major2) <  2 || \
   (major1) == 3 && (major2) == 2 && (minor) <= 2)
 #endif /* MIN_VERSION_parallel */
-/* package random-1.2.1.1 */
+/* package random-1.2.1.2 */
 #ifndef VERSION_random
-#define VERSION_random "1.2.1.1"
+#define VERSION_random "1.2.1.2"
 #endif /* VERSION_random */
 #ifndef MIN_VERSION_random
 #define MIN_VERSION_random(major1,major2,minor) (\
@@ -151,15 +151,15 @@
   (major1) == 9 && (major2) <  2 || \
   (major1) == 9 && (major2) == 2 && (minor) <= 8)
 #endif /* MIN_TOOL_VERSION_runghc */
-/* tool strip-2.41 */
+/* tool strip-2.42 */
 #ifndef TOOL_VERSION_strip
-#define TOOL_VERSION_strip "2.41"
+#define TOOL_VERSION_strip "2.42"
 #endif /* TOOL_VERSION_strip */
 #ifndef MIN_TOOL_VERSION_strip
 #define MIN_TOOL_VERSION_strip(major1,major2,minor) (\
   (major1) <  2 || \
-  (major1) == 2 && (major2) <  41 || \
-  (major1) == 2 && (major2) == 41 && (minor) <= 0)
+  (major1) == 2 && (major2) <  42 || \
+  (major1) == 2 && (major2) == 42 && (minor) <= 0)
 #endif /* MIN_TOOL_VERSION_strip */
 
 #ifndef CURRENT_COMPONENT_ID
