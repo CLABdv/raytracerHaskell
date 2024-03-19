@@ -33,6 +33,12 @@ instance Num Vec3 where
 instance NFData Vec3 where
   rnf (Vec3 i j k) = i `deepseq` j `deepseq` k `deepseq` ()
 
+vecMap :: (Double -> Double) -> Vec3 -> Vec3
+vecMap f (Vec3 a b c) = Vec3 (f a) (f b) (f c)
+
+vecZipWith :: (Double -> Double -> Double) -> Vec3 -> Vec3 -> Vec3
+vecZipWith f (Vec3 a b c) (Vec3 i j k) = Vec3 (f a i) (f b j) (f k c)
+
 -- cross multiplication of two vectors
 cross :: Vec3 -> Vec3 -> Vec3
 cross (Vec3 a b c) (Vec3 i j k) = Vec3 (b * k - c * j) (i * c - a * k) (a * j - b * i)

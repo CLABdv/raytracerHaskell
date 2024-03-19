@@ -5,6 +5,9 @@
 module LightRay
   ( coloursPar,
     Ray (Ray),
+    coloursPar',
+    colour',
+    collideBox
   )
 where
 
@@ -16,6 +19,7 @@ import Shapes
 import Vector3
 import View
 import BoundingBoxes hiding (singleton)
+import Data.Maybe (isNothing)
 
 data Ray = Ray {dir :: Vec3, origin :: Vec3, col :: Vec3}
   deriving (Show, Eq)
@@ -25,10 +29,32 @@ type CollideInfo = (Vec3, Vec3)
 delta :: Double
 delta = 0.001
 
-collideBox :: BoundingBox -> Ray -> Maybe CollideInfo
-collideBox (BoundingBox c lc hc) (Ray d o _) = undefined
-    where (Vec3 tx0 ty0 tz0) = (lc - o) * elemInverse d -- (*) is elementwise multiplication (Hadamard product)
-          (Vec3 tx1 ty1 tz1) = (hc - o) * elemInverse d -- (*) is elementwise multiplication (Hadamard product)
+-- times need to overlap for a hit
+-- aka (tx0, tx1) and (ty0, ty1) and (tz0, tz1) need to overlap
+-- TODO: rewrite prettier, feels like it should be possible
+collideBox :: BoundingBox -> Ray -> Maybe (Object, CollideInfo)
+collideBox b r@(Ray d o _) = if overlap (tx0, tx1) (ty0, ty1) && overlap (tx0, tx1) (tz0, tz1) && overlap (ty0, ty1) (tz0, tz1)
+    then case b of
+        Node s _ _ -> collide s r >>= (return . (,) s)
+        Branch b1 b2 _ _ -> 
+            case collideBox b1 r of
+                Nothing -> collideBox b2 r
+                Just c1@(_, (p1, _)) -> 
+                    case collideBox b2 r of
+                        Nothing -> Just c1
+                        Just c2@(_, (p2, _)) -> if sqVecLen (p1 - o) < sqVecLen (p2 - o) then Just c1 else Just c2
+                                    
+    else Nothing
+    where (lc, hc) = extractLCHC b
+          -- easier if we make sure the vecs are ordered
+          (Vec3 tx0 ty0 tz0) = vecZipWith min t t'
+          (Vec3 tx1 ty1 tz1) = vecZipWith max t t'
+          t  = (lc - o) * elemInverse d -- (*) is elementwise multiplication (Hadamard product)
+          t' = (hc - o) * elemInverse d
+          overlap (a,b) (c,d) | a > c && a < d = True
+                              | b > c && b < d = True
+                              | a < c && b > d = True
+                              | otherwise = False -- since the pairs are ordered, there cant be a case where b < c && a > d
 
 collide :: Object -> Ray -> Maybe CollideInfo
 collide s@(Sphere r m _) (Ray d o _)
@@ -155,6 +181,34 @@ colour cam o bounces rpp r = do
   where
     vSqrt (Vec3 a b c) = Vec3 (sqrt a) (sqrt b) (sqrt c)
 
+colour' :: Camera -> BoundingBox -> Int -> Int -> Ray -> R Vec3
+colour' cam b bounces rpp r = do
+  eles <-
+    replicateM
+      rpp
+      ( do
+          r' <- changeR cam r
+          cases' b 0 r' bounces
+      )
+  let t = foldl1' (+) eles
+  return $ vSqrt $ (scalarDiv $ fromIntegral rpp) t
+  where
+    vSqrt = vecMap sqrt
+
+coloursPar' ::
+  Camera ->
+  BoundingBox ->
+  Int ->
+  Int ->
+  [Int] ->
+  [Ray] ->
+  [Vec3]
+coloursPar' cam b bounces rpp seeds rs =
+  fmap
+    (\(x, y) -> runRandom (colour' cam b bounces rpp x) y)
+    (zip rs seeds)
+    `P.using` P.parListChunk 512 P.rseq
+
 -- this can't be in the random monad cause parallel needs to be deterministic,
 -- and random isn't deterministic until you pass it a seed
 coloursPar ::
@@ -170,6 +224,19 @@ coloursPar cam o bounces rpp seeds rs =
     (\(x, y) -> runRandom (colour cam o bounces rpp x) y)
     (zip rs seeds)
     `P.using` P.parListChunk 512 P.rseq
+
+
+cases' :: BoundingBox -> Int -> Ray -> Int -> R Vec3
+cases' b count currR maxBounce
+  | count > maxBounce = return (Vec3 0 0 0)
+  | otherwise = case collideBox b currR of
+      Nothing -> return (Vec3 0 0 0)
+      Just (Sphere _ _ (Lightsource lc), _) -> return (lc * rayCol currR)
+      Just (obj, p) -> do
+        tmpR <- bouncedRay obj p currR
+        cases' b (count + 1) tmpR maxBounce
+  where
+    rayCol (Ray _ _ c) = c
 
 cases :: [Object] -> Int -> Ray -> Int -> R Vec3
 cases o count currR maxBounce

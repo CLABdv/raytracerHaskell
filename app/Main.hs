@@ -7,6 +7,7 @@ import Shapes
 import System.Random
 import Vector3
 import View
+import qualified BoundingBoxes as B
 
 main :: IO ()
 main = do
@@ -41,10 +42,10 @@ main = do
           )
           seed
       spheres = [ground, star, star2, bb1, bb2, bb3] ++ noise
-
-      width = 40 
-      height = 25 
-      vy = unitVector $ Vec3 0 1 0 
+      box = runRandom (B.constructor spheres) seed
+      width = 40
+      height = 25
+      vy = unitVector $ Vec3 0 1 0
       resx = 400 :: Int -- FOV width in actual pixels
       resy = round (fromIntegral resx / width * height)
 
@@ -58,7 +59,7 @@ main = do
 
       rpp = 3 :: Int
       bounces = 8 :: Int
-      cols = coloursPar cam spheres bounces rpp (randoms (mkStdGen seed)) rays
+      cols = coloursPar' cam box bounces rpp (randoms (mkStdGen seed)) rays
       finCols = map (truncVec . vecToCol) cols
   putStrLn $ ppmWrite resx resy finCols
 

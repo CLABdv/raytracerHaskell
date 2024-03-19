@@ -1,10 +1,10 @@
 module BoundingBoxes
   ( constructor,
-    BoundingBox (BoundingBox),
-    ObjectTree (Node, Branch),
+    BoundingBox (Branch, Node),
     singleton,
     getLowCorner,
     getHighCorner,
+    extractLCHC,
   )
 where
 
@@ -13,6 +13,7 @@ import Data.Word (Word32)
 import Helpers
 import Shapes
 import Vector3
+import Data.Ord (comparing)
 
 data BoundingBox
   = Branch
@@ -46,31 +47,30 @@ _constructor os = do
       (a, b) = splitAt (length os `div` 2) $ sf os
   box1 <- _constructor a
   box2 <- _constructor b
-  return $ BoundingBox (Branch (extractContent box1) (extractContent box2)) (getLowCorner box1 box2) (getHighCorner box1 box2)
+  return $ Branch box1 box2 (getLowCorner box1 box2) (getHighCorner box1 box2)
+
+extractLCHC :: BoundingBox -> (Vec3, Vec3)
+extractLCHC (Branch _ _ lc hc) = (lc, hc)
+extractLCHC (Node _ lc hc) = (lc, hc)
 
 sortx :: [BoundingBox] -> [BoundingBox]
-sortx =
-  sortBy
-    ( \(BoundingBox _ (Vec3 lx1 _ _) (Vec3 hx1 _ _))
-       (BoundingBox _ (Vec3 lx2 _ _) (Vec3 hx2 _ _)) -> compare ((lx1 + hx1) / 2) ((lx2 + hx2) / 2)
-    )
-
+sortx = sortBy (comparing xCenter)
+    where xCenter v = let (Vec3 lx _ _, Vec3 hx _ _) = extractLCHC v in (hx + lx) / 2
+ 
 sorty :: [BoundingBox] -> [BoundingBox]
-sorty =
-  sortBy
-    ( \(BoundingBox _ (Vec3 _ ly1 _) (Vec3 _ hy1 _))
-       (BoundingBox _ (Vec3 _ ly2 _) (Vec3 _ hy2 _)) -> compare ((ly1 + hy1) / 2) ((ly2 + hy2) / 2)
-    )
-
+sorty = sortBy (comparing yCenter)
+    where yCenter v = let (Vec3 _ ly _, Vec3 _ hy _) = extractLCHC v in (hy + ly) / 2
+    
 sortz :: [BoundingBox] -> [BoundingBox]
-sortz =
-  sortBy
-    ( \(BoundingBox _ (Vec3 _ _ lz1) (Vec3 _ _ hz1))
-       (BoundingBox _ (Vec3 _ _ lz2) (Vec3 _ _ hz2)) -> compare ((lz1 + hz1) / 2) ((lz2 + hz2) / 2)
-    )
+sortz = sortBy (comparing zCenter)
+    where zCenter v = let (Vec3 _ _ lz, Vec3 _ _ hz) = extractLCHC v in (hz + lz) / 2
 
 getLowCorner :: BoundingBox -> BoundingBox -> Vec3
-getLowCorner (BoundingBox _ (Vec3 x1 y1 z1) _) (BoundingBox _ (Vec3 x2 y2 z2) _) = Vec3 (min x1 x2) (min y1 y2) (min z1 z2)
+getLowCorner b1 b2 = vecZipWith min v1 v2
+    where (v1, _) = extractLCHC b1
+          (v2, _) = extractLCHC b2
 
 getHighCorner :: BoundingBox -> BoundingBox -> Vec3
-getHighCorner (BoundingBox _ (Vec3 x1 y1 z1) _) (BoundingBox _ (Vec3 x2 y2 z2) _) = Vec3 (max x1 x2) (max y1 y2) (max z1 z2)
+getHighCorner b1 b2 = vecZipWith max v1 v2
+    where (_, v1) = extractLCHC b1
+          (_, v2) = extractLCHC b2
