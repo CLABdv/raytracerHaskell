@@ -3,23 +3,20 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
 module LightRay
-  ( coloursPar,
+  (
     Ray (Ray),
-    coloursPar',
-    colour',
-    collideBox
+    colours,
   )
 where
 
 import Control.Monad.State.Lazy (replicateM)
 import qualified Control.Parallel.Strategies as P
-import Data.List (foldl1', minimumBy)
+import Data.List (foldl1')
 import Helpers
 import Shapes
 import Vector3
 import View
 import BoundingBoxes hiding (singleton)
-import Data.Maybe (isNothing)
 
 data Ray = Ray {dir :: Vec3, origin :: Vec3, col :: Vec3}
   deriving (Show, Eq)
@@ -36,14 +33,14 @@ collideBox :: BoundingBox -> Ray -> Maybe (Object, CollideInfo)
 collideBox b r@(Ray d o _) = if overlap (tx0, tx1) (ty0, ty1) && overlap (tx0, tx1) (tz0, tz1) && overlap (ty0, ty1) (tz0, tz1)
     then case b of
         Node s _ _ -> collide s r >>= (return . (,) s)
-        Branch b1 b2 _ _ -> 
+        Branch b1 b2 _ _ ->
             case collideBox b1 r of
                 Nothing -> collideBox b2 r
-                Just c1@(_, (p1, _)) -> 
+                Just c1@(_, (p1, _)) ->
                     case collideBox b2 r of
                         Nothing -> Just c1
                         Just c2@(_, (p2, _)) -> if sqVecLen (p1 - o) < sqVecLen (p2 - o) then Just c1 else Just c2
-                                    
+
     else Nothing
     where (lc, hc) = extractLCHC b
           -- easier if we make sure the vecs are ordered
@@ -87,19 +84,6 @@ collide s@(Sphere r m _) (Ray d o _)
 gradient :: Object -> Vec3 -> Vec3
 gradient (Sphere _ c _) p = unitVector $ p - c
 {-# INLINE gradient #-}
-
--- Given a list of objects and a ray, checks which object is the closest to the rays origin.
-collideObjects :: [Object] -> Ray -> Maybe (Object, CollideInfo)
-collideObjects o r@(Ray _ origin _) =
-  closest (zip o $ map (`collide` r) o) >>= (\(x, (p, sN)) -> Just (x, (p + scalarMul delta sN, sN)))
-  where
-    closest [] = Nothing
-    closest xs = case minimumBy (\a b -> comparePoints (snd a) (snd b)) xs of
-      (_, Nothing) -> Nothing
-      (x, Just (p, sN)) -> Just (x, (p, sN))
-    comparePoints Nothing _ = GT
-    comparePoints _ Nothing = LT
-    comparePoints (Just (p, _)) (Just (p', _)) = compare (sqVecLen (p - origin)) (sqVecLen (p' - origin))
 
 -- Given an object, the point of intersection with that object and the ray that intersected the object,
 -- create a new ray with an origin at the bounce and appropriate new direction
@@ -167,85 +151,37 @@ changeR (CameraInternal {apertureRadius = aR, pixelHeight = pxH, pixelWidth = px
       pzd = scalarMul (ay * aR) vecy
   return (Ray (unitVector $ rDir + dd) (origin + pxd + pzd) col)
 
-colour :: Camera -> [Object] -> Int -> Int -> Ray -> R Vec3
-colour cam o bounces rpp r = do
+colour :: Camera -> BoundingBox -> Int -> Int -> Ray -> R Vec3
+colour cam b bounces rpp r = do
   eles <-
     replicateM
       rpp
       ( do
           r' <- changeR cam r
-          cases o 0 r' bounces
-      )
-  let t = foldl1' (+) eles
-  return $ vSqrt $ (scalarDiv $ fromIntegral rpp) t
-  where
-    vSqrt (Vec3 a b c) = Vec3 (sqrt a) (sqrt b) (sqrt c)
-
-colour' :: Camera -> BoundingBox -> Int -> Int -> Ray -> R Vec3
-colour' cam b bounces rpp r = do
-  eles <-
-    replicateM
-      rpp
-      ( do
-          r' <- changeR cam r
-          cases' b 0 r' bounces
+          cases b 0 r' bounces
       )
   let t = foldl1' (+) eles
   return $ vSqrt $ (scalarDiv $ fromIntegral rpp) t
   where
     vSqrt = vecMap sqrt
 
-coloursPar' ::
+colours ::
   Camera ->
   BoundingBox ->
   Int ->
   Int ->
-  [Int] ->
   [Ray] ->
-  [Vec3]
-coloursPar' cam b bounces rpp seeds rs =
-  fmap
-    (\(x, y) -> runRandom (colour' cam b bounces rpp x) y)
-    (zip rs seeds)
-    `P.using` P.parListChunk 512 P.rseq
+  R [Vec3]
+colours cam b bounces rpp = mapM (colour cam b bounces rpp)
 
--- this can't be in the random monad cause parallel needs to be deterministic,
--- and random isn't deterministic until you pass it a seed
-coloursPar ::
-  Camera ->
-  [Object] ->
-  Int ->
-  Int ->
-  [Int] ->
-  [Ray] ->
-  [Vec3]
-coloursPar cam o bounces rpp seeds rs =
-  fmap
-    (\(x, y) -> runRandom (colour cam o bounces rpp x) y)
-    (zip rs seeds)
-    `P.using` P.parListChunk 512 P.rseq
-
-
-cases' :: BoundingBox -> Int -> Ray -> Int -> R Vec3
-cases' b count currR maxBounce
+cases :: BoundingBox -> Int -> Ray -> Int -> R Vec3
+cases b count currR maxBounce
   | count > maxBounce = return (Vec3 0 0 0)
   | otherwise = case collideBox b currR of
       Nothing -> return (Vec3 0 0 0)
       Just (Sphere _ _ (Lightsource lc), _) -> return (lc * rayCol currR)
       Just (obj, p) -> do
         tmpR <- bouncedRay obj p currR
-        cases' b (count + 1) tmpR maxBounce
-  where
-    rayCol (Ray _ _ c) = c
-
-cases :: [Object] -> Int -> Ray -> Int -> R Vec3
-cases o count currR maxBounce
-  | count > maxBounce = return (Vec3 0 0 0)
-  | otherwise = case collideObjects o currR of
-      Nothing -> return (Vec3 0 0 0)
-      Just (Sphere _ _ (Lightsource lc), _) -> return (lc * rayCol currR)
-      Just (obj, p) -> do
-        tmpR <- bouncedRay obj p currR
-        cases o (count + 1) tmpR maxBounce
+        cases b (count + 1) tmpR maxBounce
   where
     rayCol (Ray _ _ c) = c

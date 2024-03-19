@@ -46,7 +46,7 @@ main = do
       width = 40
       height = 25
       vy = unitVector $ Vec3 0 1 0
-      resx = 400 :: Int -- FOV width in actual pixels
+      resx = 600 :: Int -- FOV width in actual pixels
       resy = round (fromIntegral resx / width * height)
 
       cam = createCamera lookfrom lookat vy height width resx 0.1
@@ -57,9 +57,9 @@ main = do
       -- There probably is a better way to do this, but this'll work for now.
       rays = concatMap (map (\x -> Ray (x - lookfrom) lookfrom (Vec3 1 1 1))) rect
 
-      rpp = 3 :: Int
+      rpp = 300 :: Int
       bounces = 8 :: Int
-      cols = coloursPar' cam box bounces rpp (randoms (mkStdGen seed)) rays
+      cols = runRandom (colours cam box bounces rpp rays) seed
       finCols = map (truncVec . vecToCol) cols
   putStrLn $ ppmWrite resx resy finCols
 
