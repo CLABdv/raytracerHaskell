@@ -3,20 +3,18 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
 module LightRay
-  (
-    Ray (Ray),
+  ( Ray (Ray),
     colours,
   )
 where
 
+import BoundingBoxes hiding (singleton)
 import Control.Monad.State.Lazy (replicateM)
-import qualified Control.Parallel.Strategies as P
 import Data.List (foldl1')
 import Helpers
 import Shapes
 import Vector3
 import View
-import BoundingBoxes hiding (singleton)
 
 data Ray = Ray {dir :: Vec3, origin :: Vec3, col :: Vec3}
   deriving (Show, Eq)
@@ -30,28 +28,30 @@ delta = 0.001
 -- aka (tx0, tx1) and (ty0, ty1) and (tz0, tz1) need to overlap
 -- TODO: rewrite prettier, feels like it should be possible
 collideBox :: BoundingBox -> Ray -> Maybe (Object, CollideInfo)
-collideBox b r@(Ray d o _) = if overlap (tx0, tx1) (ty0, ty1) && overlap (tx0, tx1) (tz0, tz1) && overlap (ty0, ty1) (tz0, tz1)
+collideBox b r@(Ray d o _) =
+  if overlap (tx0, tx1) (ty0, ty1) && overlap (tx0, tx1) (tz0, tz1) && overlap (ty0, ty1) (tz0, tz1)
     then case b of
-        Node s _ _ -> collide s r >>= (return . (,) s)
-        Branch b1 b2 _ _ ->
-            case collideBox b1 r of
-                Nothing -> collideBox b2 r
-                Just c1@(_, (p1, _)) ->
-                    case collideBox b2 r of
-                        Nothing -> Just c1
-                        Just c2@(_, (p2, _)) -> if sqVecLen (p1 - o) < sqVecLen (p2 - o) then Just c1 else Just c2
-
+      Node s _ _ -> collide s r >>= (return . (,) s)
+      Branch b1 b2 _ _ ->
+        case collideBox b1 r of
+          Nothing -> collideBox b2 r
+          Just c1@(_, (p1, _)) ->
+            case collideBox b2 r of
+              Nothing -> Just c1
+              Just c2@(_, (p2, _)) -> if sqVecLen (p1 - o) < sqVecLen (p2 - o) then Just c1 else Just c2
     else Nothing
-    where (lc, hc) = extractLCHC b
-          -- easier if we make sure the vecs are ordered
-          (Vec3 tx0 ty0 tz0) = vecZipWith min t t'
-          (Vec3 tx1 ty1 tz1) = vecZipWith max t t'
-          t  = (lc - o) * elemInverse d -- (*) is elementwise multiplication (Hadamard product)
-          t' = (hc - o) * elemInverse d
-          overlap (a,b) (c,d) | a > c && a < d = True
-                              | b > c && b < d = True
-                              | a < c && b > d = True
-                              | otherwise = False -- since the pairs are ordered, there cant be a case where b < c && a > d
+  where
+    (lc, hc) = extractLCHC b
+    -- easier if we make sure the vecs are ordered
+    (Vec3 tx0 ty0 tz0) = vecZipWith min t t'
+    (Vec3 tx1 ty1 tz1) = vecZipWith max t t'
+    t = (lc - o) * elemInverse d -- (*) is elementwise multiplication (Hadamard product)
+    t' = (hc - o) * elemInverse d
+    overlap (a, b) (c, d)
+      | a > c && a < d = True
+      | b > c && b < d = True
+      | a < c && b > d = True
+      | otherwise = False -- since the pairs are ordered, there cant be a case where b < c && a > d
 
 collide :: Object -> Ray -> Maybe CollideInfo
 collide s@(Sphere r m _) (Ray d o _)
@@ -104,12 +104,10 @@ bouncedRay (Sphere _ _ (Specular a b)) (p, g) (Ray rDir _ c) = do
   let dirOut = reflect rDir g
       f = min b 1
   return (Ray (unitVector $ dirOut + scalarMul f t) p (a * c))
--- TODO: Rewrite this part. For instance, scalarMul 0.0035 norm should be resolved somewhere else
+-- IMPORTANT: Refractive (most likely) is bugged, it looks weird
 bouncedRay (Sphere _ _ (Refractive i)) (p, g) (Ray rDir _ col) = do
   refMaybe <- rand -- Interval [0,1], deciding if reflecting or not. See schlick's approx wikipedia.
   let isInc = dot g rDir < 0 -- This checks if the ray is incoming towards the object
-  -- aka, if going from air to mat or mat to air
-  -- if so the dot of g and rdir will be negative
       rri = if isInc then 1 / i else i -- ratio of refractive indices
       norm = if isInc then g else negate g
       cosTheta = -dot rDir norm

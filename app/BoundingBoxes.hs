@@ -8,12 +8,11 @@ module BoundingBoxes
   )
 where
 
-import Data.List (sortBy)
+import Data.List (sortOn)
 import Data.Word (Word32)
 import Helpers
 import Shapes
 import Vector3
-import Data.Ord (comparing)
 
 data BoundingBox
   = Branch
@@ -54,23 +53,28 @@ extractLCHC (Branch _ _ lc hc) = (lc, hc)
 extractLCHC (Node _ lc hc) = (lc, hc)
 
 sortx :: [BoundingBox] -> [BoundingBox]
-sortx = sortBy (comparing xCenter)
-    where xCenter v = let (Vec3 lx _ _, Vec3 hx _ _) = extractLCHC v in (hx + lx) / 2
- 
+sortx = sortOn xCenter
+  where
+    xCenter v = let (Vec3 lx _ _, Vec3 hx _ _) = extractLCHC v in (hx + lx) / 2
+
 sorty :: [BoundingBox] -> [BoundingBox]
-sorty = sortBy (comparing yCenter)
-    where yCenter v = let (Vec3 _ ly _, Vec3 _ hy _) = extractLCHC v in (hy + ly) / 2
-    
+sorty = sortOn yCenter
+  where
+    yCenter v = let (Vec3 _ ly _, Vec3 _ hy _) = extractLCHC v in (hy + ly) / 2
+
 sortz :: [BoundingBox] -> [BoundingBox]
-sortz = sortBy (comparing zCenter)
-    where zCenter v = let (Vec3 _ _ lz, Vec3 _ _ hz) = extractLCHC v in (hz + lz) / 2
+sortz = sortOn zCenter
+  where
+    zCenter v = let (Vec3 _ _ lz, Vec3 _ _ hz) = extractLCHC v in (hz + lz) / 2
 
 getLowCorner :: BoundingBox -> BoundingBox -> Vec3
 getLowCorner b1 b2 = vecZipWith min v1 v2
-    where (v1, _) = extractLCHC b1
-          (v2, _) = extractLCHC b2
+  where
+    (v1, _) = extractLCHC b1
+    (v2, _) = extractLCHC b2
 
 getHighCorner :: BoundingBox -> BoundingBox -> Vec3
 getHighCorner b1 b2 = vecZipWith max v1 v2
-    where (_, v1) = extractLCHC b1
-          (_, v2) = extractLCHC b2
+  where
+    (_, v1) = extractLCHC b1
+    (_, v2) = extractLCHC b2
