@@ -16,7 +16,11 @@ import Shapes
 import Vector3
 import View
 
-data Ray = Ray {dir :: Vec3, origin :: Vec3, col :: Vec3}
+data Ray = Ray
+  { dir :: {-# UNPACK #-} !Vec3,
+    origin :: {-# UNPACK #-} !Vec3,
+    col :: {-# UNPACK #-} !Vec3
+  }
   deriving (Show, Eq)
 
 type CollideInfo = (Vec3, Vec3)
@@ -26,10 +30,13 @@ delta = 0.001
 
 -- times need to overlap for a hit
 -- aka (tx0, tx1) and (ty0, ty1) and (tz0, tz1) need to overlap
--- TODO: rewrite prettier, feels like it should be possible
+-- TODO: rewrite prettier
+-- also see if it is possible to optimize
 collideBox :: BoundingBox -> Ray -> Maybe (Object, CollideInfo)
 collideBox b r@(Ray d o _) =
-  if overlap (tx0, tx1) (ty0, ty1) && overlap (tx0, tx1) (tz0, tz1) && overlap (ty0, ty1) (tz0, tz1)
+  if overlap (tx0, tx1) (ty0, ty1)
+    && overlap (tx0, tx1) (tz0, tz1)
+    && overlap (ty0, ty1) (tz0, tz1)
     then case b of
       Node s _ _ -> collide s r >>= (return . (,) s)
       Branch b1 b2 _ _ ->
@@ -43,15 +50,14 @@ collideBox b r@(Ray d o _) =
   where
     (lc, hc) = extractLCHC b
     -- easier if we make sure the vecs are ordered
-    (Vec3 tx0 ty0 tz0) = vecZipWith min t t'
-    (Vec3 tx1 ty1 tz1) = vecZipWith max t t'
+    (Vec3 (tx0, ty0, tz0)) = vecZipWith min t t'
+    (Vec3 (tx1, ty1, tz1)) = vecZipWith max t t'
     t = (lc - o) * elemInverse d -- (*) is elementwise multiplication (Hadamard product)
     t' = (hc - o) * elemInverse d
-    overlap (a, b) (c, d)
-      | a > c && a < d = True
-      | b > c && b < d = True
-      | a < c && b > d = True
-      | otherwise = False -- since the pairs are ordered, there cant be a case where b < c && a > d
+    overlap (a, b) (c, d) =
+      (a > c && a < d)
+        || (b > c && b < d)
+        || (a < c && b > d) -- since the pairs are ordered, there can't be a case where b < c && a > d
 
 collide :: Object -> Ray -> Maybe CollideInfo
 collide s@(Sphere r m _) (Ray d o _)
@@ -118,7 +124,7 @@ bouncedRay (Sphere _ _ (Refractive i)) (p, g) (Ray rDir _ col) = do
             then reflect rDir norm
             else refract rDir norm rri
         )
-        (p - scalarMul (4 * delta) norm)
+        (p - scalarMul delta norm)
         col
     )
   where
@@ -130,12 +136,12 @@ bouncedRay (Sphere _ _ (Refractive i)) (p, g) (Ray rDir _ col) = do
 reflect :: Vec3 -> Vec3 -> Vec3
 reflect rIn norm = rIn - scalarMul (2 * dot rIn norm) norm
 
--- Observe that norm is the normal vector such that the dot product of it and rin is positive.
+-- Observe that norm is the normal vector such that the dot product of it and rin is negative.
 -- Refracts gives the refracted ray given an incoming ray, a normal and ref indices
 refract :: Vec3 -> Vec3 -> Double -> Vec3
 refract rIn norm rri = rPerpendicular + rParallell
   where
-    rPerpendicular = scalarMul rri (rIn + scalarMul (dot (negate rIn) norm) norm)
+    rPerpendicular = scalarMul rri (rIn + scalarMul (dot (-rIn) norm) norm)
     rParallell = scalarMul (-sqrt (1 - sqVecLen rPerpendicular)) norm
 
 -- Changes ray to account for defocus blur (aperture size) and antialiasing
@@ -163,20 +169,20 @@ colour cam b bounces rpp r = do
   where
     vSqrt = vecMap sqrt
 
-colours ::
+colours :: (Traversable t) => 
   Camera ->
   BoundingBox ->
   Int ->
   Int ->
-  [Ray] ->
-  R [Vec3]
+  t Ray ->
+  R (t Vec3)
 colours cam b bounces rpp = mapM (colour cam b bounces rpp)
 
 cases :: BoundingBox -> Int -> Ray -> Int -> R Vec3
 cases b count currR maxBounce
-  | count > maxBounce = return (Vec3 0 0 0)
+  | count > maxBounce = return 0
   | otherwise = case collideBox b currR of
-      Nothing -> return (Vec3 0 0 0)
+      Nothing -> return 0
       Just (Sphere _ _ (Lightsource lc), _) -> return (lc * rayCol currR)
       Just (obj, p) -> do
         tmpR <- bouncedRay obj p currR

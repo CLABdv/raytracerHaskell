@@ -5,14 +5,14 @@ import Vector3
 
 -- Material colours should be in the interval [0,1]
 data Material
-  = Lambertian Vec3
-  | Lightsource Vec3
-  | Specular Vec3 Double-- Colour; Fuzz
-  | Refractive Double -- Any material which refracts light. TODO: Make so that a material can be partially refractive, make so the material can have a colour. Currently always assumes "air" is vacuum
+  = Lambertian {-# UNPACK #-} !Vec3
+  | Lightsource {-# UNPACK #-} !Vec3
+  | Specular {-# UNPACK #-} !Vec3 {-# UNPACK #-} !Double -- Colour; Fuzz
+  | Refractive {-# UNPACK #-} !Double -- Any material which refracts light. TODO: Make so that a material can be partially refractive, make so the material can have a colour. Currently always assumes "air" is vacuum
   deriving (Show, Eq)
 
 -- sphere with a center and a radius
-data Object = Sphere Double Vec3 Material
+data Object = Sphere {-# UNPACK #-} !Double {-# UNPACK #-} !Vec3 !Material
   deriving (Show, Eq)
 
 -- Generates material data for an object.

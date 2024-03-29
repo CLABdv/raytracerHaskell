@@ -1,6 +1,7 @@
 module View where
 
 import Vector3
+import qualified Data.Vector as V
 
 -- TODO: depth of field blur (aperture stuff, simulate camera focal point)
 -- Use createCamera to construct. CameraInternal is only for internal usage.
@@ -33,9 +34,9 @@ createCamera lookFrom lookAt vup height width resx = CameraInternal vy vx vz llc
     pxW = width / fromIntegral resx
     pxH = height / fromIntegral resy
 
-createRect :: Camera -> [[Vec3]]
+createRect :: Camera -> [Vec3]
 createRect (CameraInternal vy vx _ llc _ _ resx resy pxW pxH _) =
-  map (take resx . (\x -> genRow x $ scalarMul pxW vx)) firstCol
+  concatMap (take resx . (\x -> genRow x $ scalarMul pxW vx)) firstCol
   where
     -- HACK: I reverse the list to make up be upwards instead of up being downwards.
     -- generates the columns furthest to the left.
@@ -43,3 +44,7 @@ createRect (CameraInternal vy vx _ llc _ _ resx resy pxW pxH _) =
     -- generates an infinite list of 3d vectors.
     -- basically [base,base+step..] if i had implemented Enum
     genRow base step = base : genRow (base + step) step
+
+
+createVecRect :: Camera -> V.Vector Vec3
+createVecRect = V.fromList . createRect

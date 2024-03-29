@@ -1,3 +1,6 @@
+-- unboxed is such a hassle, i need to implement it for ray too, 
+-- but i am fucking mad as frick at it so that will have to wait
+-- {-# LANGUAGE TypeFamilies, StandaloneDeriving, MultiParamTypeClasses, GeneralizedNewtypeDeriving #-}
 module Vector3 (module Vector3) where
 
 -- BUG
@@ -9,61 +12,76 @@ module Vector3 (module Vector3) where
 -- Implement scalarDiv
 
 import Control.DeepSeq
+import qualified Data.Vector.Generic as VG
+import qualified Data.Vector.Generic.Mutable as VGM
+import qualified Data.Vector.Unboxed as VU
 import Helpers
 import System.Random (Random)
 
 -- X Y Z
 -- Three dimensional vector of floating points.
-data Vec3 = Vec3 {-# UNPACK #-} !Double {-# UNPACK #-} !Double {-# UNPACK #-} !Double
+-- TODO: Make to a 3-entry tuple?
+newtype Vec3 = Vec3 (Double, Double, Double)
   deriving (Show, Eq)
 
 instance Num Vec3 where
-  Vec3 a b c + Vec3 i j k = Vec3 (a + i) (b + j) (c + k)
+  Vec3 (a, b, c) + Vec3 (i, j, k) = Vec3 (a + i, b + j, c + k)
   {-# INLINE (+) #-}
-  Vec3 a b c - Vec3 i j k = Vec3 (a - i) (b - j) (c - k)
+  Vec3 (a, b, c) - Vec3 (i, j, k) = Vec3 (a - i, b - j, c - k)
   {-# INLINE (-) #-}
 
-  Vec3 a b c * Vec3 i j k = Vec3 (a * i) (b * j) (c * k) -- Elementwise multiplication.
+  Vec3 (a, b, c) * Vec3 (i, j, k) = Vec3 (a * i, b * j, c * k) -- Elementwise multiplication.
   {-# INLINE (*) #-}
-  abs (Vec3 a b c) = Vec3 (abs a) (abs b) (abs c)
-  signum (Vec3 a b c) = Vec3 (signum a) (signum b) (signum c)
-  fromInteger i = Vec3 (fromInteger i) (fromInteger i) (fromInteger i)
-  negate (Vec3 a b c) = Vec3 (-a) (-b) (-c)
+  abs (Vec3 (a, b, c)) = Vec3 (abs a, abs b, abs c)
+  signum (Vec3 (a, b, c)) = Vec3 (signum a, signum b, signum c)
+  fromInteger i = Vec3 (fromInteger i, fromInteger i, fromInteger i)
+  negate (Vec3 (a, b, c)) = Vec3 (-a, -b, -c)
 
 instance NFData Vec3 where
-  rnf (Vec3 i j k) = i `deepseq` j `deepseq` k `deepseq` ()
+  rnf (Vec3 c) = c `deepseq` ()
+
+-- Basically copy-pasted from
+-- https://hackage.haskell.org/package/vector-0.13.1.0/docs/Data-Vector-Unboxed.html
+-- I previously had Vec3 as three items (not triple-tuple), but idk how tf to implement this then, so truple it is
+{-
+newtype instance VU.MVector s Vec3 = MV_Vec3 (VU.MVector s (Double, Double, Double))
+newtype instance VU.Vector Vec3 = V_Vec3 (VU.Vector (Double, Double, Double))
+deriving instance VGM.MVector VU.MVector Vec3
+deriving instance VG.Vector VU.Vector Vec3
+instance VU.Unbox Vec3
+-}
 
 vecMap :: (Double -> Double) -> Vec3 -> Vec3
-vecMap f (Vec3 a b c) = Vec3 (f a) (f b) (f c)
+vecMap f (Vec3 (a, b, c)) = Vec3 (f a, f b, f c)
 
 vecZipWith :: (Double -> Double -> Double) -> Vec3 -> Vec3 -> Vec3
-vecZipWith f (Vec3 a b c) (Vec3 i j k) = Vec3 (f a i) (f b j) (f k c)
+vecZipWith f (Vec3 (a, b, c)) (Vec3 (i, j, k)) = Vec3 (f a i, f b j, f k c)
 
 -- cross multiplication of two vectors
 cross :: Vec3 -> Vec3 -> Vec3
-cross (Vec3 a b c) (Vec3 i j k) = Vec3 (b * k - c * j) (i * c - a * k) (a * j - b * i)
+cross (Vec3 (a, b, c)) (Vec3 (i, j, k)) = Vec3 (b * k - c * j, i * c - a * k, a * j - b * i)
 {-# INLINE cross #-}
 
 -- dot multiplication of two vectors
 dot :: Vec3 -> Vec3 -> Double
-dot (Vec3 a b c) (Vec3 i j k) = a * i + b * j + c * k
+dot (Vec3 (a, b, c)) (Vec3 (i, j, k)) = a * i + b * j + c * k
 {-# INLINE dot #-}
 
 elemInverse :: Vec3 -> Vec3
-elemInverse (Vec3 a b c) = Vec3 (1 / a) (1 / b) (1 / c)
+elemInverse (Vec3 (a, b, c)) = Vec3 (1 / a, 1 / b, 1 / c)
 {-# INLINE elemInverse #-}
 
 scalarMul :: Double -> Vec3 -> Vec3
-scalarMul s (Vec3 a b c) = Vec3 (a * s) (b * s) (c * s)
+scalarMul s (Vec3 (a, b, c)) = Vec3 (a * s, b * s, c * s)
 {-# INLINE scalarMul #-}
 
 scalarDiv :: Double -> Vec3 -> Vec3
-scalarDiv s (Vec3 a b c) = Vec3 (a / s) (b / s) (c / s)
+scalarDiv s (Vec3 (a, b, c)) = Vec3 (a / s, b / s, c / s)
 {-# INLINE scalarDiv #-}
 
 -- gives the squared vector length. This is useful cuz taking the square root is slow and is not always needed
 sqVecLen :: Vec3 -> Double
-sqVecLen (Vec3 a b c) = a * a + b * b + c * c
+sqVecLen (Vec3 (a, b, c)) = a * a + b * b + c * c
 {-# INLINE sqVecLen #-}
 
 vecLen :: Vec3 -> Double
@@ -72,7 +90,7 @@ vecLen = sqrt . sqVecLen
 
 -- Produce a unit vector given a vector
 unitVector :: Vec3 -> Vec3
-unitVector r@(Vec3 a b c) = Vec3 (a / l) (b / l) (c / l)
+unitVector r@(Vec3 (a, b, c)) = Vec3 (a / l, b / l, c / l)
   where
     l = vecLen r
 {-# INLINE unitVector #-}
@@ -81,7 +99,7 @@ randVec = do
   x <- rand
   y <- rand
   z <- rand
-  return $ Vec3 x y z
+  return $ Vec3 (x, y, z)
 
 randInUnitDisc :: (Floating a, Ord a, Random a) => R (a, a)
 randInUnitDisc = do

@@ -30,16 +30,6 @@
   (major1) == 1 && (major2) <  4 || \
   (major1) == 1 && (major2) == 4 && (minor) <= 6)
 #endif /* MIN_VERSION_deepseq */
-/* package monad-par-0.3.6 */
-#ifndef VERSION_monad_par
-#define VERSION_monad_par "0.3.6"
-#endif /* VERSION_monad_par */
-#ifndef MIN_VERSION_monad_par
-#define MIN_VERSION_monad_par(major1,major2,minor) (\
-  (major1) <  0 || \
-  (major1) == 0 && (major2) <  3 || \
-  (major1) == 0 && (major2) == 3 && (minor) <= 6)
-#endif /* MIN_VERSION_monad_par */
 /* package mtl-2.2.2 */
 #ifndef VERSION_mtl
 #define VERSION_mtl "2.2.2"
@@ -60,9 +50,9 @@
   (major1) == 3 && (major2) <  2 || \
   (major1) == 3 && (major2) == 2 && (minor) <= 2)
 #endif /* MIN_VERSION_parallel */
-/* package random-1.2.1.1 */
+/* package random-1.2.1.2 */
 #ifndef VERSION_random
-#define VERSION_random "1.2.1.1"
+#define VERSION_random "1.2.1.2"
 #endif /* VERSION_random */
 #ifndef MIN_VERSION_random
 #define MIN_VERSION_random(major1,major2,minor) (\
@@ -70,27 +60,17 @@
   (major1) == 1 && (major2) <  2 || \
   (major1) == 1 && (major2) == 2 && (minor) <= 1)
 #endif /* MIN_VERSION_random */
+/* package vector-0.13.1.0 */
+#ifndef VERSION_vector
+#define VERSION_vector "0.13.1.0"
+#endif /* VERSION_vector */
+#ifndef MIN_VERSION_vector
+#define MIN_VERSION_vector(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  13 || \
+  (major1) == 0 && (major2) == 13 && (minor) <= 1)
+#endif /* MIN_VERSION_vector */
 
-/* tool alex-3.2.7.2 */
-#ifndef TOOL_VERSION_alex
-#define TOOL_VERSION_alex "3.2.7.2"
-#endif /* TOOL_VERSION_alex */
-#ifndef MIN_TOOL_VERSION_alex
-#define MIN_TOOL_VERSION_alex(major1,major2,minor) (\
-  (major1) <  3 || \
-  (major1) == 3 && (major2) <  2 || \
-  (major1) == 3 && (major2) == 2 && (minor) <= 7)
-#endif /* MIN_TOOL_VERSION_alex */
-/* tool cpphs-1.20.9 */
-#ifndef TOOL_VERSION_cpphs
-#define TOOL_VERSION_cpphs "1.20.9"
-#endif /* TOOL_VERSION_cpphs */
-#ifndef MIN_TOOL_VERSION_cpphs
-#define MIN_TOOL_VERSION_cpphs(major1,major2,minor) (\
-  (major1) <  1 || \
-  (major1) == 1 && (major2) <  20 || \
-  (major1) == 1 && (major2) == 20 && (minor) <= 9)
-#endif /* MIN_TOOL_VERSION_cpphs */
 /* tool gcc-13 */
 #ifndef TOOL_VERSION_gcc
 #define TOOL_VERSION_gcc "13"
@@ -131,16 +111,6 @@
   (major1) == 2 && (major2) <  26 || \
   (major1) == 2 && (major2) == 26 && (minor) <= 0)
 #endif /* MIN_TOOL_VERSION_haddock */
-/* tool happy-1.20.1.1 */
-#ifndef TOOL_VERSION_happy
-#define TOOL_VERSION_happy "1.20.1.1"
-#endif /* TOOL_VERSION_happy */
-#ifndef MIN_TOOL_VERSION_happy
-#define MIN_TOOL_VERSION_happy(major1,major2,minor) (\
-  (major1) <  1 || \
-  (major1) == 1 && (major2) <  20 || \
-  (major1) == 1 && (major2) == 20 && (minor) <= 1)
-#endif /* MIN_TOOL_VERSION_happy */
 /* tool hpc-0.68 */
 #ifndef TOOL_VERSION_hpc
 #define TOOL_VERSION_hpc "0.68"
@@ -161,25 +131,15 @@
   (major1) == 0 && (major2) <  68 || \
   (major1) == 0 && (major2) == 68 && (minor) <= 8)
 #endif /* MIN_TOOL_VERSION_hsc2hs */
-/* tool hscolour-1.25 */
-#ifndef TOOL_VERSION_hscolour
-#define TOOL_VERSION_hscolour "1.25"
-#endif /* TOOL_VERSION_hscolour */
-#ifndef MIN_TOOL_VERSION_hscolour
-#define MIN_TOOL_VERSION_hscolour(major1,major2,minor) (\
-  (major1) <  1 || \
-  (major1) == 1 && (major2) <  25 || \
-  (major1) == 1 && (major2) == 25 && (minor) <= 0)
-#endif /* MIN_TOOL_VERSION_hscolour */
-/* tool pkg-config-2.1.1 */
+/* tool pkg-config-1.8.1 */
 #ifndef TOOL_VERSION_pkg_config
-#define TOOL_VERSION_pkg_config "2.1.1"
+#define TOOL_VERSION_pkg_config "1.8.1"
 #endif /* TOOL_VERSION_pkg_config */
 #ifndef MIN_TOOL_VERSION_pkg_config
 #define MIN_TOOL_VERSION_pkg_config(major1,major2,minor) (\
-  (major1) <  2 || \
-  (major1) == 2 && (major2) <  1 || \
-  (major1) == 2 && (major2) == 1 && (minor) <= 1)
+  (major1) <  1 || \
+  (major1) == 1 && (major2) <  8 || \
+  (major1) == 1 && (major2) == 8 && (minor) <= 1)
 #endif /* MIN_TOOL_VERSION_pkg_config */
 /* tool runghc-9.2.8 */
 #ifndef TOOL_VERSION_runghc
@@ -191,15 +151,15 @@
   (major1) == 9 && (major2) <  2 || \
   (major1) == 9 && (major2) == 2 && (minor) <= 8)
 #endif /* MIN_TOOL_VERSION_runghc */
-/* tool strip-2.41 */
+/* tool strip-2.42 */
 #ifndef TOOL_VERSION_strip
-#define TOOL_VERSION_strip "2.41"
+#define TOOL_VERSION_strip "2.42"
 #endif /* TOOL_VERSION_strip */
 #ifndef MIN_TOOL_VERSION_strip
 #define MIN_TOOL_VERSION_strip(major1,major2,minor) (\
   (major1) <  2 || \
-  (major1) == 2 && (major2) <  41 || \
-  (major1) == 2 && (major2) == 41 && (minor) <= 0)
+  (major1) == 2 && (major2) <  42 || \
+  (major1) == 2 && (major2) == 42 && (minor) <= 0)
 #endif /* MIN_TOOL_VERSION_strip */
 
 #ifndef CURRENT_COMPONENT_ID

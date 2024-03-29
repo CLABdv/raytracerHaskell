@@ -22,14 +22,14 @@ data BoundingBox
         hc :: {-# UNPACK #-} !Vec3 -- high corner, all high values
       }
   | Node
-      { c :: Object,
+      { c :: {-# UNPACK #-} !Object,
         lc :: {-# UNPACK #-} !Vec3,
         hc :: {-# UNPACK #-} !Vec3
       }
   deriving (Eq, Show)
 
 singleton :: Object -> BoundingBox
-singleton s@(Sphere r m _) = let rVec = Vec3 r r r in Node s (m - rVec) (m + rVec)
+singleton s@(Sphere r m _) = let rVec = Vec3 (r, r, r) in Node s (m - rVec) (m + rVec)
 
 constructor :: [Object] -> R BoundingBox
 constructor = _constructor . map singleton
@@ -55,17 +55,17 @@ extractLCHC (Node _ lc hc) = (lc, hc)
 sortx :: [BoundingBox] -> [BoundingBox]
 sortx = sortOn xCenter
   where
-    xCenter v = let (Vec3 lx _ _, Vec3 hx _ _) = extractLCHC v in (hx + lx) / 2
+    xCenter v = let (Vec3 (lx, _, _), Vec3 (hx, _, _)) = extractLCHC v in (hx + lx) / 2
 
 sorty :: [BoundingBox] -> [BoundingBox]
 sorty = sortOn yCenter
   where
-    yCenter v = let (Vec3 _ ly _, Vec3 _ hy _) = extractLCHC v in (hy + ly) / 2
+    yCenter v = let (Vec3 (_, ly, _), Vec3 (_, hy, _)) = extractLCHC v in (hy + ly) / 2
 
 sortz :: [BoundingBox] -> [BoundingBox]
 sortz = sortOn zCenter
   where
-    zCenter v = let (Vec3 _ _ lz, Vec3 _ _ hz) = extractLCHC v in (hz + lz) / 2
+    zCenter v = let (Vec3 (_, _, lz), Vec3 (_, _, hz)) = extractLCHC v in (hz + lz) / 2
 
 getLowCorner :: BoundingBox -> BoundingBox -> Vec3
 getLowCorner b1 b2 = vecZipWith min v1 v2

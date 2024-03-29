@@ -44,7 +44,7 @@ executable ray
                       , random >= 1.2
                       , mtl
                       , deepseq
-                      , monad-par
                       , parallel
+                      , vector
     hs-source-dirs:   app
     default-language: Haskell2010
