@@ -40,8 +40,8 @@ executable ray
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
-    build-depends:    base ^>=4.16.4.0
-                      , random >= 1.2
+    build-depends:    base
+                      , random
                       , mtl
                       , deepseq
                       , parallel

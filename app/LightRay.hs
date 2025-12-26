@@ -9,7 +9,7 @@ module LightRay
 where
 
 import BoundingBoxes hiding (singleton)
-import Control.Monad.State.Lazy (replicateM)
+import Control.Monad (replicateM)
 import Data.List (foldl1')
 import Helpers
 import Shapes

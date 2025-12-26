@@ -17,7 +17,7 @@ main = do
   Make the FOV be in radians/degrees instead of a given thingy
   Create a error when the plane up is the exact same direction as the vector from lookfrom to lookat.
 
-  For light, make it so that lightsources dont look all fucky
+  For light, make it so that lightsources dont look weird
   Maybe rework how the lightsources work all togheter
 
   Implement bounding boxes
